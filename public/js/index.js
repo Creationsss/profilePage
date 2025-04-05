@@ -74,9 +74,6 @@ const head = document.querySelector("head");
 let userId = head?.dataset.userId;
 let instanceUri = head?.dataset.instanceUri;
 
-console.log("User ID:", userId);
-console.log("Instance URI:", instanceUri);
-
 if (userId && instanceUri) {
 	if (!instanceUri.startsWith("http")) {
 		instanceUri = `https://${instanceUri}`;

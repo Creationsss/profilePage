@@ -48,7 +48,6 @@ export async function getLanyardData(id?: string): Promise<LanyardResponse> {
 
 export async function handleReadMe(data: LanyardData): Promise<string | null> {
 	const userReadMe: string | null = data.kv?.readme;
-	console.log("userReadMe", userReadMe);
 
 	if (
 		!userReadMe ||
