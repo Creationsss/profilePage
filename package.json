@@ -28,6 +28,7 @@
 		"typescript": "^5.8.2"
 	},
 	"dependencies": {
-		"ejs": "^3.1.10"
+		"ejs": "^3.1.10",
+		"node-vibrant": "^4.0.3"
 	}
 }
