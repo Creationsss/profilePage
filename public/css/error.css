@@ -1,0 +1,25 @@
+body {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	min-height: 90vh;
+	background: #0e0e10;
+	color: #fff;
+	font-family: system-ui, sans-serif;
+}
+.error-container {
+	text-align: center;
+	padding: 2rem;
+	background: #1a1a1d;
+	border-radius: 12px;
+	box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
+.error-title {
+	font-size: 2rem;
+	margin-bottom: 1rem;
+	color: #ff4e4e;
+}
+.error-message {
+	font-size: 1.2rem;
+	opacity: 0.8;
+}
