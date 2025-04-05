@@ -1,5 +1,6 @@
 import { lanyardConfig } from "@config/environment";
 import { fetch } from "bun";
+import { marked } from "marked";
 
 export async function getLanyardData(id?: string): Promise<LanyardResponse> {
 	let instance: string = lanyardConfig.instance;
@@ -43,4 +44,50 @@ export async function getLanyardData(id?: string): Promise<LanyardResponse> {
 	}
 
 	return data;
+}
+
+export async function handleReadMe(data: LanyardData): Promise<string | null> {
+	const userReadMe: string | null = data.kv?.readme;
+	console.log("userReadMe", userReadMe);
+
+	if (
+		!userReadMe ||
+		!userReadMe.toLowerCase().endsWith("readme.md") ||
+		!userReadMe.startsWith("http")
+	) {
+		return null;
+	}
+
+	try {
+		const res: Response = await fetch(userReadMe, {
+			headers: {
+				Accept: "text/markdown",
+			},
+		});
+
+		const contentType: string = res.headers.get("content-type") || "";
+		if (
+			!res.ok ||
+			!(
+				contentType.includes("text/markdown") ||
+				contentType.includes("text/plain")
+			)
+		)
+			return null;
+
+		if (res.headers.has("content-length")) {
+			const size: number = parseInt(
+				res.headers.get("content-length") || "0",
+				10,
+			);
+			if (size > 1024 * 100) return null;
+		}
+
+		const text: string = await res.text();
+		if (!text || text.length < 10) return null;
+
+		return marked.parse(text);
+	} catch {
+		return null;
+	}
 }

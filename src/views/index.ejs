@@ -3,6 +3,11 @@
 <head data-user-id="<%= user.id %>" data-instance-uri="<%= instance %>">
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<meta property="og:title" content="<%= username %>'s Presence">
+	<meta property="og:image" content="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>">
+	<meta property="og:description" content="<%= activities[0]?.state || 'Discord Presence' %>">
+
 	<title><%= title %></title>
 
 	<link rel="stylesheet" href="/public/css/index.css">
@@ -99,7 +104,7 @@
 
 						<% if (progress !== null) { %>
 							<div class="progress-bar" data-start="<%= start %>" data-end="<%= end %>">
-								<div class="progress-fill" style="width: <%= progress %>%"></div>
+								<div class="progress-fill" <%= progress !== null ? `style="width: ${progress}%"` : '' %>></div>
 							</div>
 
 							<% if (start && end) { %>
@@ -113,6 +118,12 @@
 				</li>
 			<% }) %>
 		</ul>
+	<% } %>
+	<% if (readme) { %>
+		<h2>Readme</h2>
+		<section class="readme">
+			<div class="markdown-body"><%- readme %></div>
+		</section>
 	<% } %>
 </body>
 </html>
