@@ -33,7 +33,7 @@ async function handler(request: ExtendedRequest): Promise<Response> {
 		await handleReadMe(presence);
 
 	const ejsTemplateData: EjsTemplateData = {
-		title: "User Page",
+		title: `${presence.discord_user.username || "Unknown"}`,
 		username: presence.discord_user.username,
 		status: presence.discord_status,
 		activities: presence.activities,

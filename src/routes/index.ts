@@ -32,8 +32,10 @@ async function handler(): Promise<Response> {
 		await handleReadMe(presence);
 
 	const ejsTemplateData: EjsTemplateData = {
-		title: "User Page",
-		username: presence.discord_user.username,
+		title:
+			presence.discord_user.global_name || presence.discord_user.username,
+		username:
+			presence.discord_user.global_name || presence.discord_user.username,
 		status: presence.discord_status,
 		activities: presence.activities,
 		user: presence.discord_user,

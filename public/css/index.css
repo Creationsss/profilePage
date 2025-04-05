@@ -419,6 +419,10 @@ ul {
 	margin: 1rem 0;
 }
 
+.markdown-body img {
+	max-width: 100%;
+}
+
 @media (max-width: 600px) {
 	.readme {
 		width: 100%;
