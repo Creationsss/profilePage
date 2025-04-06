@@ -1,6 +1,6 @@
 import { lanyardConfig } from "@config/environment";
 import { renderEjsTemplate } from "@helpers/ejs";
-import { getLanyardData } from "@helpers/lanyard";
+import { getLanyardData, handleReadMe } from "@helpers/lanyard";
 
 const routeDef: RouteDef = {
 	method: "GET",
@@ -12,8 +12,8 @@ async function handler(): Promise<Response> {
 	const data: LanyardResponse = await getLanyardData();
 
 	if (!data.success) {
-		return Response.json(data.error, {
-			status: 500,
+		return await renderEjsTemplate("error", {
+			message: data.error.message,
 		});
 	}
 
@@ -28,20 +28,24 @@ async function handler(): Promise<Response> {
 	}
 
 	const presence: LanyardData = data.data;
+	const readme: string | Promise<string> | null =
+		await handleReadMe(presence);
+
 	const ejsTemplateData: EjsTemplateData = {
-		title: "User Page",
-		username: presence.discord_user.username,
+		title:
+			presence.discord_user.global_name || presence.discord_user.username,
+		username:
+			presence.discord_user.global_name || presence.discord_user.username,
 		status: presence.discord_status,
 		activities: presence.activities,
 		user: presence.discord_user,
-
 		platform: {
 			desktop: presence.active_on_discord_desktop,
 			mobile: presence.active_on_discord_mobile,
 			web: presence.active_on_discord_web,
 		},
-
-		instance: instance,
+		instance,
+		readme,
 	};
 
 	return await renderEjsTemplate("index", ejsTemplateData);

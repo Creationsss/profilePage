@@ -29,6 +29,7 @@
 	},
 	"dependencies": {
 		"ejs": "^3.1.10",
-		"node-vibrant": "^4.0.3"
+		"node-vibrant": "^4.0.3",
+		"marked": "^15.0.7"
 	}
 }
