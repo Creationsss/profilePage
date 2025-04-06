@@ -10,13 +10,13 @@
 		"cleanup": "rm -rf logs node_modules bun.lockdb"
 	},
 	"devDependencies": {
-		"@eslint/js": "^9.23.0",
-		"@types/bun": "^1.2.6",
+		"@eslint/js": "^9.24.0",
+		"@types/bun": "^1.2.8",
 		"@types/ejs": "^3.1.5",
-		"@typescript-eslint/eslint-plugin": "^8.28.0",
-		"@typescript-eslint/parser": "^8.28.0",
-		"eslint": "^9.23.0",
-		"eslint-plugin-prettier": "^5.2.5",
+		"@typescript-eslint/eslint-plugin": "^8.29.0",
+		"@typescript-eslint/parser": "^8.29.0",
+		"eslint": "^9.24.0",
+		"eslint-plugin-prettier": "^5.2.6",
 		"eslint-plugin-promise": "^7.2.1",
 		"eslint-plugin-simple-import-sort": "^12.1.1",
 		"eslint-plugin-unicorn": "^56.0.1",
@@ -25,10 +25,11 @@
 		"prettier": "^3.5.3"
 	},
 	"peerDependencies": {
-		"typescript": "^5.8.2"
+		"typescript": "^5.8.3"
 	},
 	"dependencies": {
 		"ejs": "^3.1.10",
+		"node-vibrant": "^4.0.3",
 		"marked": "^15.0.7"
 	}
 }
