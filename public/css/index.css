@@ -224,6 +224,38 @@ ul {
 	color: #f0b232;
 }
 
+.activity-buttons {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin-top: 0.75rem;
+}
+
+.activity-button {
+	background-color: #5865f2;
+	color: white;
+	border: none;
+	border-radius: 3px;
+	padding: 0.5rem 1rem;
+	font-size: 0.9rem;
+	cursor: pointer;
+	text-decoration: none;
+	transition: background-color 0.2s ease;
+	display: inline-block;
+}
+
+.activity-button:hover {
+	background-color: #4752c4;
+	text-decoration: none;
+}
+
+.activity-button.disabled {
+	background-color: #4e5058;
+	cursor: default;
+	pointer-events: none;
+	opacity: 0.8;
+}
+
 @media (max-width: 600px) {
 	html {
 		font-size: clamp(14px, 2vw, 16px);
@@ -337,6 +369,17 @@ ul {
 		font-size: 0.7rem;
 		margin-top: 0.25rem;
 		width: 100%;
+	}
+
+	.activity-buttons {
+		justify-content: center;
+		margin-top: 0.5rem;
+		width: 100%;
+	}
+
+	.activity-button {
+		font-size: 0.85rem;
+		padding: 0.4rem 0.8rem;
 	}
 }
 
