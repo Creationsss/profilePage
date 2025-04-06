@@ -102,6 +102,27 @@
 							<div class="activity-detail"><%= activity.state %></div>
 						<% } %>
 
+						<% if (activity.buttons && activity.buttons.length > 0) { %>
+							<div class="activity-buttons">
+								<% activity.buttons.forEach((button, index) => {
+									const buttonLabel = typeof button === 'string' ? button : button.label;
+									let buttonUrl = null;
+									if (typeof button === 'object' && button.url) {
+										buttonUrl = button.url;
+									}
+									else if (index === 0 && activity.url) {
+										buttonUrl = activity.url;
+									}
+								%>
+									<% if (buttonUrl) { %>
+										<a href="<%= buttonUrl %>" class="activity-button" target="_blank" rel="noopener noreferrer"><%= buttonLabel %></a>
+									<% } else { %>
+										<span class="activity-button disabled"><%= buttonLabel %></span>
+									<% } %>
+								<% }); %>
+							</div>
+						<% } %>
+
 						<% if (progress !== null) { %>
 							<div class="progress-bar" data-start="<%= start %>" data-end="<%= end %>">
 								<div class="progress-fill" <%= progress !== null ? `style="width: ${progress}%"` : '' %>></div>

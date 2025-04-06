@@ -1,0 +1,16 @@
+2025-04-06 21:35:30.351 [INFO] (server.ts:40:10) Server running at http://0.0.0.0:8080
+2025-04-06 21:35:30.402 [INFO] (server.ts:49:10) Available routes:
+2025-04-06 21:35:30.410 [INFO] (server.ts:58:11) Route: /[id], File: C:/Users/exode/Documents/profilePage/src/routes/[id].ts
+2025-04-06 21:35:30.409 [INFO] (server.ts:58:11) Route: /, File: C:/Users/exode/Documents/profilePage/src/routes/index.ts
+2025-04-06 21:36:00.076 [INFO] (server.ts:40:10) Server running at http://0.0.0.0:8080
+2025-04-06 21:36:00.081 [INFO] (server.ts:58:11) Route: /[id], File: C:/Users/exode/Documents/profilePage/src/routes/[id].ts
+2025-04-06 21:36:00.080 [INFO] (server.ts:49:10) Available routes:
+2025-04-06 21:36:00.081 [INFO] (server.ts:58:11) Route: /, File: C:/Users/exode/Documents/profilePage/src/routes/index.ts
+2025-04-06 21:36:35.063 [INFO] (server.ts:40:10) Server running at http://0.0.0.0:8080
+2025-04-06 21:36:35.066 [INFO] (server.ts:49:10) Available routes:
+2025-04-06 21:36:35.067 [INFO] (server.ts:58:11) Route: /[id], File: C:/Users/exode/Documents/profilePage/src/routes/[id].ts
+2025-04-06 21:36:35.067 [INFO] (server.ts:58:11) Route: /, File: C:/Users/exode/Documents/profilePage/src/routes/index.ts
+2025-04-06 21:37:16.785 [INFO] (server.ts:40:10) Server running at http://0.0.0.0:8080
+2025-04-06 21:37:16.789 [INFO] (server.ts:58:11) Route: /[id], File: C:/Users/exode/Documents/profilePage/src/routes/[id].ts
+2025-04-06 21:37:16.789 [INFO] (server.ts:58:11) Route: /, File: C:/Users/exode/Documents/profilePage/src/routes/index.ts
+2025-04-06 21:37:16.788 [INFO] (server.ts:49:10) Available routes:

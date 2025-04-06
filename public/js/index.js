@@ -156,6 +156,26 @@ function buildActivityHTML(activity) {
 			`
 			: "";
 
+	const activityButtons = activity.buttons && activity.buttons.length > 0
+		? `<div class="activity-buttons">
+			${activity.buttons.map((button, index) => {
+				const buttonLabel = typeof button === 'string' ? button : button.label;
+				let buttonUrl = null;
+				if (typeof button === 'object' && button.url) {
+					buttonUrl = button.url;
+				}
+				else if (index === 0 && activity.url) {
+					buttonUrl = activity.url;
+				}
+				if (buttonUrl) {
+					return `<a href="${buttonUrl}" class="activity-button" target="_blank" rel="noopener noreferrer">${buttonLabel}</a>`;
+				} else {
+					return `<span class="activity-button disabled">${buttonLabel}</span>`;
+				}
+			}).join('')}
+		</div>`
+		: '';
+
 	return `
 		<li class="activity">
 			${art ? `<img class="activity-art" src="${art}" alt="Art">` : ""}
@@ -166,6 +186,7 @@ function buildActivityHTML(activity) {
 				</div>
 				${activity.details ? `<div class="activity-detail">${activity.details}</div>` : ""}
 				${activity.state ? `<div class="activity-detail">${activity.state}</div>` : ""}
+				${activityButtons}
 				${progressBar}
 			</div>
 		</li>
