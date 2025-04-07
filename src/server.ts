@@ -34,22 +34,16 @@ class ServerHandler {
 				open: webSocketHandler.handleOpen.bind(webSocketHandler),
 				message: webSocketHandler.handleMessage.bind(webSocketHandler),
 				close: webSocketHandler.handleClose.bind(webSocketHandler),
-				error(error) {
-					logger.error(`Server error: ${error.message}`);
-					return new Response(`Server Error: ${error.message}`, {
-						status: 500,
-					});
-				},
 			},
 		});
 
-		const accessUrls = [
+		const accessUrls: string[] = [
 			`http://${server.hostname}:${server.port}`,
 			`http://localhost:${server.port}`,
 			`http://127.0.0.1:${server.port}`,
 		];
 
-		logger.info(`Server running at ${accessUrls[0]}`, true);
+		logger.info(`Server running at ${accessUrls[0]}`);
 		logger.info(`Access via: ${accessUrls[1]} or ${accessUrls[2]}`, true);
 
 		this.logRoutes();

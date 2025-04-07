@@ -4,9 +4,20 @@ const activityProgressMap = new Map();
 
 function formatTime(ms) {
 	const totalSecs = Math.floor(ms / 1000);
-	const mins = Math.floor(totalSecs / 60);
+	const hours = Math.floor(totalSecs / 3600);
+	const mins = Math.floor((totalSecs % 3600) / 60);
 	const secs = totalSecs % 60;
-	return `${mins}:${secs.toString().padStart(2, "0")}`;
+
+	return `${String(hours).padStart(1, "0")}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+}
+
+function formatVerbose(ms) {
+	const totalSecs = Math.floor(ms / 1000);
+	const hours = Math.floor(totalSecs / 3600);
+	const mins = Math.floor((totalSecs % 3600) / 60);
+	const secs = totalSecs % 60;
+
+	return `${hours}h ${mins}m ${secs}s`;
 }
 
 function updateElapsedAndProgress() {
@@ -17,17 +28,14 @@ function updateElapsedAndProgress() {
 		if (!start) return;
 
 		const elapsed = now - start;
-		const mins = Math.floor(elapsed / 60000);
-		const secs = Math.floor((elapsed % 60000) / 1000);
 		const display = el.querySelector(".elapsed");
-		if (display)
-			display.textContent = `(${mins}m ${secs.toString().padStart(2, "0")}s ago)`;
+		if (display) display.textContent = `(${formatVerbose(elapsed)} ago)`;
 	});
 
 	document.querySelectorAll(".progress-bar").forEach((bar) => {
 		const start = Number(bar.dataset.start);
 		const end = Number(bar.dataset.end);
-		if (!start || !end || end <= start) return;
+		if (!start || !end || end <= start || now > end) return;
 
 		const duration = end - start;
 		const elapsed = now - start;
@@ -43,7 +51,7 @@ function updateElapsedAndProgress() {
 	document.querySelectorAll(".progress-time-labels").forEach((label) => {
 		const start = Number(label.dataset.start);
 		const end = Number(label.dataset.end);
-		if (!start || !end || end <= start) return;
+		if (!start || !end || end <= start || now > end) return;
 
 		const current = Math.max(0, now - start);
 		const total = end - start;
@@ -102,7 +110,7 @@ if (userId && instanceUri) {
 
 		if (payload.t === "INIT_STATE" || payload.t === "PRESENCE_UPDATE") {
 			updatePresence(payload.d);
-			updateElapsedAndProgress();
+			requestAnimationFrame(() => updateElapsedAndProgress());
 		}
 	});
 }
@@ -129,64 +137,98 @@ function buildActivityHTML(activity) {
 		art = `https://cdn.discordapp.com/app-assets/${activity.application_id}/${img}.png`;
 	}
 
+	const activityTypeMap = {
+		0: "Playing",
+		1: "Streaming",
+		2: "Listening",
+		3: "Watching",
+		4: "Custom Status",
+		5: "Competing",
+	};
+
+	const activityType =
+		activity.name === "Spotify"
+			? "Listening to Spotify"
+			: activity.name === "TIDAL"
+				? "Listening to TIDAL"
+				: activityTypeMap[activity.type] || "Playing";
+
 	const activityTimestamp =
-		!total && start
-			? `
-		<div class="activity-timestamp" data-start="${start}">
-			<span>
-				Since: ${new Date(start).toLocaleTimeString("en-GB", {
-					hour: "2-digit",
-					minute: "2-digit",
-					second: "2-digit",
-				})} <span class="elapsed"></span>
-			</span>
-		</div>`
+		start && progress === null
+			? `<div class="activity-timestamp" data-start="${start}">
+						<span>Since: ${new Date(start).toLocaleTimeString("en-GB", {
+							hour: "2-digit",
+							minute: "2-digit",
+							second: "2-digit",
+						})} <span class="elapsed"></span></span>
+					</div>`
+			: "";
+
+	const activityButtons =
+		activity.buttons && activity.buttons.length > 0
+			? `<div class="activity-buttons">
+					${activity.buttons
+						.map((button, index) => {
+							const label =
+								typeof button === "string"
+									? button
+									: button.label;
+							let url = null;
+							if (typeof button === "object" && button.url) {
+								url = button.url;
+							} else if (index === 0 && activity.url) {
+								url = activity.url;
+							}
+							return url
+								? `<a href="${url}" class="activity-button" target="_blank" rel="noopener noreferrer">${label}</a>`
+								: null;
+						})
+						.filter(Boolean)
+						.join("")}
+				</div>`
 			: "";
 
 	const progressBar =
 		progress !== null
-			? `
-				<div class="progress-bar" data-start="${start}" data-end="${end}">
+			? `<div class="progress-bar" data-start="${start}" data-end="${end}">
 					<div class="progress-fill" style="width: ${progress}%"></div>
 				</div>
 				<div class="progress-time-labels" data-start="${start}" data-end="${end}">
 					<span class="progress-current">${formatTime(elapsed)}</span>
 					<span class="progress-total">${formatTime(total)}</span>
-				</div>
-			`
+				</div>`
 			: "";
 
-	const activityButtons = activity.buttons && activity.buttons.length > 0
-		? `<div class="activity-buttons">
-			${activity.buttons.map((button, index) => {
-				const buttonLabel = typeof button === 'string' ? button : button.label;
-				let buttonUrl = null;
-				if (typeof button === 'object' && button.url) {
-					buttonUrl = button.url;
-				}
-				else if (index === 0 && activity.url) {
-					buttonUrl = activity.url;
-				}
-				if (buttonUrl) {
-					return `<a href="${buttonUrl}" class="activity-button" target="_blank" rel="noopener noreferrer">${buttonLabel}</a>`;
-				} else {
-					return `<span class="activity-button disabled">${buttonLabel}</span>`;
-				}
-			}).join('')}
-		</div>`
-		: '';
+	const isMusic = activity.type === 2 || activity.type === 3;
+
+	const primaryLine = isMusic ? activity.details : activity.name;
+	const secondaryLine = isMusic ? activity.state : activity.details;
+	const tertiaryLine = isMusic ? activity.assets?.large_text : activity.state;
 
 	return `
 		<li class="activity">
-			${art ? `<img class="activity-art" src="${art}" alt="Art">` : ""}
-			<div class="activity-content">
-				<div class="activity-header ${progress !== null ? "no-timestamp" : ""}">
-					<span class="activity-name">${activity.name}</span>
+			<div class="activity-wrapper">
+				<div class="activity-type-wrapper">
+					<span class="activity-type-label" data-type="${activity.type}">${activityType}</span>
 					${activityTimestamp}
 				</div>
-				${activity.details ? `<div class="activity-detail">${activity.details}</div>` : ""}
-				${activity.state ? `<div class="activity-detail">${activity.state}</div>` : ""}
-				${activityButtons}
+				<div class="activity-wrapper-inner">
+					${art ? `<img class="activity-art" src="${art}" alt="Art">` : ""}
+					<div class="activity-content">
+						<div class="inner-content">
+							<div class="activity-top">
+								<div class="activity-header ${progress !== null ? "no-timestamp" : ""}">
+									<span class="activity-name">${primaryLine}</span>
+								</div>
+								${secondaryLine ? `<div class="activity-detail">${secondaryLine}</div>` : ""}
+								${tertiaryLine ? `<div class="activity-detail">${tertiaryLine}</div>` : ""}
+							</div>
+							<div class="activity-bottom">
+								${activityButtons}
+							</div>
+						</div>
+					</div>
+				</div>
 				${progressBar}
 			</div>
 		</li>
@@ -234,10 +276,21 @@ function updatePresence(data) {
 		} else if (emoji?.name) {
 			emojiHTML = `${emoji.name} `;
 		}
-		customStatus.innerHTML = `${emojiHTML}${custom.state}`;
+		customStatus.innerHTML = `
+			${emojiHTML}
+			${custom.state ? `<span class="custom-status-text">${custom.state}</span>` : ""}
+		`;
 	}
 
-	const filtered = data.activities?.filter((a) => a.type !== 4);
+	const filtered = data.activities
+		?.filter((a) => a.type !== 4)
+		?.sort((a, b) => {
+			const priority = { 2: 0, 1: 1, 3: 2 }; // Listening, Streaming, Watching ? should i keep this
+			const aPriority = priority[a.type] ?? 99;
+			const bPriority = priority[b.type] ?? 99;
+			return aPriority - bPriority;
+		});
+
 	const activityList = document.querySelector(".activities");
 
 	if (activityList) {

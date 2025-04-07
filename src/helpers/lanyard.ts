@@ -1,5 +1,6 @@
 import { lanyardConfig } from "@config/environment";
 import { fetch } from "bun";
+import DOMPurify from "isomorphic-dompurify";
 import { marked } from "marked";
 
 export async function getLanyardData(id?: string): Promise<LanyardResponse> {
@@ -85,7 +86,10 @@ export async function handleReadMe(data: LanyardData): Promise<string | null> {
 		const text: string = await res.text();
 		if (!text || text.length < 10) return null;
 
-		return marked.parse(text);
+		const html: string | null = await marked.parse(text);
+		const safe: string | null = DOMPurify.sanitize(html);
+
+		return safe;
 	} catch {
 		return null;
 	}
