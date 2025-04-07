@@ -78,7 +78,10 @@
 
 				const img = activity.assets?.large_image;
 				let art = null;
-				if (img?.includes("https")) {
+
+				if (img?.startsWith("mp:external/")) {
+					art = `https://media.discordapp.net/external/${img.slice("mp:external/".length)}`;
+				} else if (img?.includes("/https/")) {
 					const clean = img.split("/https/")[1];
 					if (clean) art = `https://${clean}`;
 				} else if (img?.startsWith("spotify:")) {
@@ -86,6 +89,7 @@
 				} else if (img) {
 					art = `https://cdn.discordapp.com/app-assets/${activity.application_id}/${img}.png`;
 				}
+
 
 				const activityTypeMap = {
 					0: "Playing",

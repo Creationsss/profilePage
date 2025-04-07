@@ -35,10 +35,10 @@ function updateElapsedAndProgress() {
 	document.querySelectorAll(".progress-bar").forEach((bar) => {
 		const start = Number(bar.dataset.start);
 		const end = Number(bar.dataset.end);
-		if (!start || !end || end <= start || now > end) return;
+		if (!start || !end || end <= start) return;
 
 		const duration = end - start;
-		const elapsed = now - start;
+		const elapsed = Math.min(now - start, duration);
 		const progress = Math.min(
 			100,
 			Math.max(0, Math.floor((elapsed / duration) * 100)),
@@ -51,9 +51,10 @@ function updateElapsedAndProgress() {
 	document.querySelectorAll(".progress-time-labels").forEach((label) => {
 		const start = Number(label.dataset.start);
 		const end = Number(label.dataset.end);
-		if (!start || !end || end <= start || now > end) return;
+		if (!start || !end || end <= start) return;
 
-		const current = Math.max(0, now - start);
+		const isPaused = now > end;
+		const current = isPaused ? end - start : Math.max(0, now - start);
 		const total = end - start;
 
 		const currentEl = label.querySelector(".progress-current");
@@ -62,7 +63,7 @@ function updateElapsedAndProgress() {
 		const id = `${start}-${end}`;
 		const last = activityProgressMap.get(id);
 
-		if (last !== undefined && last === current) {
+		if (isPaused || (last !== undefined && last === current)) {
 			label.classList.add("paused");
 		} else {
 			label.classList.remove("paused");
@@ -70,7 +71,11 @@ function updateElapsedAndProgress() {
 
 		activityProgressMap.set(id, current);
 
-		if (currentEl) currentEl.textContent = formatTime(current);
+		if (currentEl) {
+			currentEl.textContent = isPaused
+				? `Paused at ${formatTime(current)}`
+				: formatTime(current);
+		}
 		if (totalEl) totalEl.textContent = formatTime(total);
 	});
 }
@@ -94,24 +99,36 @@ if (userId && instanceUri) {
 
 	const socket = new WebSocket(`${wsUri}/socket`);
 
-	socket.addEventListener("open", () => {
-		socket.send(
-			JSON.stringify({
-				op: 2,
-				d: {
-					subscribe_to_id: userId,
-				},
-			}),
-		);
-	});
+	let heartbeatInterval = null;
+
+	socket.addEventListener("open", () => {});
 
 	socket.addEventListener("message", (event) => {
 		const payload = JSON.parse(event.data);
+
+		if (payload.op === 1 && payload.d?.heartbeat_interval) {
+			heartbeatInterval = setInterval(() => {
+				socket.send(JSON.stringify({ op: 3 }));
+			}, payload.d.heartbeat_interval);
+
+			socket.send(
+				JSON.stringify({
+					op: 2,
+					d: {
+						subscribe_to_id: userId,
+					},
+				}),
+			);
+		}
 
 		if (payload.t === "INIT_STATE" || payload.t === "PRESENCE_UPDATE") {
 			updatePresence(payload.d);
 			requestAnimationFrame(() => updateElapsedAndProgress());
 		}
+	});
+
+	socket.addEventListener("close", () => {
+		if (heartbeatInterval) clearInterval(heartbeatInterval);
 	});
 }
 
@@ -128,7 +145,10 @@ function buildActivityHTML(activity) {
 
 	const img = activity.assets?.large_image;
 	let art = null;
-	if (img?.includes("https")) {
+
+	if (img?.startsWith("mp:external/")) {
+		art = `https://media.discordapp.net/external/${img.slice("mp:external/".length)}`;
+	} else if (img?.includes("/https/")) {
 		const clean = img.split("/https/")[1];
 		if (clean) art = `https://${clean}`;
 	} else if (img?.startsWith("spotify:")) {
