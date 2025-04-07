@@ -76,20 +76,32 @@
 				const total = (start && end) ? end - start : null;
 				const progress = (total && elapsed > 0) ? Math.min(100, Math.floor((elapsed / total) * 100)) : null;
 
-				const img = activity.assets?.large_image;
 				let art = null;
+				let smallArt = null;
 
-				if (img?.startsWith("mp:external/")) {
-					art = `https://media.discordapp.net/external/${img.slice("mp:external/".length)}`;
-				} else if (img?.includes("/https/")) {
-					const clean = img.split("/https/")[1];
-					if (clean) art = `https://${clean}`;
-				} else if (img?.startsWith("spotify:")) {
-					art = `https://i.scdn.co/image/${img.split(":")[1]}`;
-				} else if (img) {
-					art = `https://cdn.discordapp.com/app-assets/${activity.application_id}/${img}.png`;
+				function resolveActivityImage(img, applicationId) {
+					if (!img) return null;
+
+					if (img.startsWith("mp:external/")) {
+						return `https://media.discordapp.net/external/${img.slice("mp:external/".length)}`;
+					}
+
+					if (img.includes("/https/")) {
+						const clean = img.split("/https/")[1];
+						return clean ? `https://${clean}` : null;
+					}
+
+					if (img.startsWith("spotify:")) {
+						return `https://i.scdn.co/image/${img.split(":")[1]}`;
+					}
+
+					return `https://cdn.discordapp.com/app-assets/${applicationId}/${img}.png`;
 				}
 
+				if (activity.assets) {
+					art = resolveActivityImage(activity.assets.large_image, activity.application_id);
+					smallArt = resolveActivityImage(activity.assets.small_image, activity.application_id);
+				}
 
 				const activityTypeMap = {
 					0: "Playing",
@@ -124,7 +136,12 @@
 
 						<div class="activity-wrapper-inner">
 							<% if (art) { %>
-								<img class="activity-art" src="<%= art %>" alt="Art">
+								<div class="activity-image-wrapper">
+									<img class="activity-image" src="<%= art %>" alt="Art" <% activity.assets?.large_text ? `title="${activity.assets.large_text}"` : '' %>>
+									<% if (smallArt) { %>
+										<img class="activity-image-small" src="<%= smallArt %>" alt="Small Art" <% activity.assets?.small_text ? `title="${activity.assets.small_text}"` : '' %>>
+									<% } %>
+								</div>
 							<% } %>
 
 							<div class="activity-content">

@@ -30,11 +30,18 @@ async function handler(): Promise<Response> {
 	const presence: LanyardData = data.data;
 	const readme: string | Promise<string> | null = await handleReadMe(presence);
 
+	let status: string;
+	if (presence.activities.some((activity) => activity.type === 1)) {
+		status = "streaming";
+	} else {
+		status = presence.discord_status;
+	}
+
 	const ejsTemplateData: EjsTemplateData = {
 		title: presence.discord_user.global_name || presence.discord_user.username,
 		username:
 			presence.discord_user.global_name || presence.discord_user.username,
-		status: presence.discord_status,
+		status: status,
 		activities: presence.activities,
 		user: presence.discord_user,
 		platform: {

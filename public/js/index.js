@@ -130,6 +130,25 @@ if (userId && instanceUri) {
 	});
 }
 
+function resolveActivityImage(img, applicationId) {
+	if (!img) return null;
+
+	if (img.startsWith("mp:external/")) {
+		return `https://media.discordapp.net/external/${img.slice("mp:external/".length)}`;
+	}
+
+	if (img.includes("/https/")) {
+		const clean = img.split("/https/")[1];
+		return clean ? `https://${clean}` : null;
+	}
+
+	if (img.startsWith("spotify:")) {
+		return `https://i.scdn.co/image/${img.split(":")[1]}`;
+	}
+
+	return `https://cdn.discordapp.com/app-assets/${applicationId}/${img}.png`;
+}
+
 function buildActivityHTML(activity) {
 	const start = activity.timestamps?.start;
 	const end = activity.timestamps?.end;
@@ -141,18 +160,18 @@ function buildActivityHTML(activity) {
 			? Math.min(100, Math.floor((elapsed / total) * 100))
 			: null;
 
-	const img = activity.assets?.large_image;
 	let art = null;
+	let smallArt = null;
 
-	if (img?.startsWith("mp:external/")) {
-		art = `https://media.discordapp.net/external/${img.slice("mp:external/".length)}`;
-	} else if (img?.includes("/https/")) {
-		const clean = img.split("/https/")[1];
-		if (clean) art = `https://${clean}`;
-	} else if (img?.startsWith("spotify:")) {
-		art = `https://i.scdn.co/image/${img.split(":")[1]}`;
-	} else if (img) {
-		art = `https://cdn.discordapp.com/app-assets/${activity.application_id}/${img}.png`;
+	if (activity.assets) {
+		art = resolveActivityImage(
+			activity.assets.large_image,
+			activity.application_id,
+		);
+		smallArt = resolveActivityImage(
+			activity.assets.small_image,
+			activity.application_id,
+		);
 	}
 
 	const activityTypeMap = {
@@ -220,6 +239,13 @@ function buildActivityHTML(activity) {
 	const secondaryLine = isMusic ? activity.state : activity.details;
 	const tertiaryLine = isMusic ? activity.assets?.large_text : activity.state;
 
+	const activityArt = art
+		? `<div class="activity-image-wrapper">
+				<img class="activity-image" src="${art}" alt="Art" ${activity.assets?.large_text ? `title="${activity.assets.large_text}"` : ""}>
+				${smallArt ? `<img class="activity-image-small" src="${smallArt}" alt="Small Art" ${activity.assets?.small_text ? `title="${activity.assets.small_text}"` : ""}>` : ""}
+			</div>`
+		: "";
+
 	return `
 		<li class="activity">
 			<div class="activity-wrapper">
@@ -228,7 +254,7 @@ function buildActivityHTML(activity) {
 					${activityTimestamp}
 				</div>
 				<div class="activity-wrapper-inner">
-					${art ? `<img class="activity-art" src="${art}" alt="Art">` : ""}
+					${activityArt}
 					<div class="activity-content">
 						<div class="inner-content">
 							<div class="activity-top">
@@ -264,8 +290,16 @@ function updatePresence(data) {
 		desktop: data.active_on_discord_desktop,
 	};
 
+	let status = "offline";
+	console.log(data.activities.some((activity) => activity.type === 1));
+	if (data.activities.some((activity) => activity.type === 1)) {
+		status = "streaming";
+	} else {
+		status = data.discord_status;
+	}
+
 	if (statusIndicator) {
-		statusIndicator.className = `status-indicator ${data.discord_status}`;
+		statusIndicator.className = `status-indicator ${status}`;
 	}
 
 	if (platform.mobile && !mobileIcon) {
@@ -276,7 +310,7 @@ function updatePresence(data) {
 		`;
 	} else if (!platform.mobile && mobileIcon) {
 		mobileIcon.remove();
-		avatarWrapper.innerHTML += `<div class="status-indicator ${data.discord_status}"></div>`;
+		avatarWrapper.innerHTML += `<div class="status-indicator ${status}"></div>`;
 	}
 
 	const custom = data.activities?.find((a) => a.type === 4);
