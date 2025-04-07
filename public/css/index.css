@@ -107,7 +107,6 @@ h1 {
 	flex-wrap: wrap;
 }
 
-
 .custom-status .custom-emoji {
 	width: 20px;
 	height: 20px;
@@ -379,7 +378,7 @@ ul {
 		align-items: center;
 		text-align: center;
 		padding: 1rem;
-		border-radius:0;
+		border-radius: 0;
 	}
 
 	.activity-art {

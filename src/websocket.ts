@@ -1,5 +1,5 @@
 import { logger } from "@helpers/logger";
-import { type ServerWebSocket } from "bun";
+import type { ServerWebSocket } from "bun";
 
 class WebSocketHandler {
 	public handleMessage(ws: ServerWebSocket, message: string): void {
@@ -20,11 +20,7 @@ class WebSocketHandler {
 		}
 	}
 
-	public handleClose(
-		ws: ServerWebSocket,
-		code: number,
-		reason: string,
-	): void {
+	public handleClose(ws: ServerWebSocket, code: number, reason: string): void {
 		logger.warn(`WebSocket closed with code ${code}, reason: ${reason}`);
 	}
 }

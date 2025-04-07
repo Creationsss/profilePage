@@ -1,5 +1,5 @@
+import { resolve } from "node:path";
 import { renderFile } from "ejs";
-import { resolve } from "path";
 
 export async function renderEjsTemplate(
 	viewName: string | string[],

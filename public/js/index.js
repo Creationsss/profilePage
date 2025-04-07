@@ -1,5 +1,3 @@
-/* eslint-disable indent */
-
 const activityProgressMap = new Map();
 
 function formatTime(ms) {
@@ -23,19 +21,19 @@ function formatVerbose(ms) {
 function updateElapsedAndProgress() {
 	const now = Date.now();
 
-	document.querySelectorAll(".activity-timestamp").forEach((el) => {
+	for (const el of document.querySelectorAll(".activity-timestamp")) {
 		const start = Number(el.dataset.start);
-		if (!start) return;
+		if (!start) continue;
 
 		const elapsed = now - start;
 		const display = el.querySelector(".elapsed");
 		if (display) display.textContent = `(${formatVerbose(elapsed)} ago)`;
-	});
+	}
 
-	document.querySelectorAll(".progress-bar").forEach((bar) => {
+	for (const bar of document.querySelectorAll(".progress-bar")) {
 		const start = Number(bar.dataset.start);
 		const end = Number(bar.dataset.end);
-		if (!start || !end || end <= start) return;
+		if (!start || !end || end <= start) continue;
 
 		const duration = end - start;
 		const elapsed = Math.min(now - start, duration);
@@ -46,12 +44,12 @@ function updateElapsedAndProgress() {
 
 		const fill = bar.querySelector(".progress-fill");
 		if (fill) fill.style.width = `${progress}%`;
-	});
+	}
 
-	document.querySelectorAll(".progress-time-labels").forEach((label) => {
+	for (const label of document.querySelectorAll(".progress-time-labels")) {
 		const start = Number(label.dataset.start);
 		const end = Number(label.dataset.end);
-		if (!start || !end || end <= start) return;
+		if (!start || !end || end <= start) continue;
 
 		const isPaused = now > end;
 		const current = isPaused ? end - start : Math.max(0, now - start);
@@ -77,14 +75,14 @@ function updateElapsedAndProgress() {
 				: formatTime(current);
 		}
 		if (totalEl) totalEl.textContent = formatTime(total);
-	});
+	}
 }
 
 updateElapsedAndProgress();
 setInterval(updateElapsedAndProgress, 1000);
 
 const head = document.querySelector("head");
-let userId = head?.dataset.userId;
+const userId = head?.dataset.userId;
 let instanceUri = head?.dataset.instanceUri;
 
 if (userId && instanceUri) {
@@ -189,10 +187,7 @@ function buildActivityHTML(activity) {
 			? `<div class="activity-buttons">
 					${activity.buttons
 						.map((button, index) => {
-							const label =
-								typeof button === "string"
-									? button
-									: button.label;
+							const label = typeof button === "string" ? button : button.label;
 							let url = null;
 							if (typeof button === "object" && button.url) {
 								url = button.url;
@@ -258,9 +253,7 @@ function buildActivityHTML(activity) {
 function updatePresence(data) {
 	const avatarWrapper = document.querySelector(".avatar-wrapper");
 	const statusIndicator = avatarWrapper?.querySelector(".status-indicator");
-	const mobileIcon = avatarWrapper?.querySelector(
-		".platform-icon.mobile-only",
-	);
+	const mobileIcon = avatarWrapper?.querySelector(".platform-icon.mobile-only");
 
 	const userInfo = document.querySelector(".user-info");
 	const customStatus = userInfo?.querySelector(".custom-status");

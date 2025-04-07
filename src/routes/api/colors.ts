@@ -24,10 +24,7 @@ async function handler(request: ExtendedRequest): Promise<Response> {
 	try {
 		res = await fetch(url);
 	} catch {
-		return Response.json(
-			{ error: "Failed to fetch image" },
-			{ status: 500 },
-		);
+		return Response.json({ error: "Failed to fetch image" }, { status: 500 });
 	}
 
 	if (!res.ok) {

@@ -28,12 +28,10 @@ async function handler(): Promise<Response> {
 	}
 
 	const presence: LanyardData = data.data;
-	const readme: string | Promise<string> | null =
-		await handleReadMe(presence);
+	const readme: string | Promise<string> | null = await handleReadMe(presence);
 
 	const ejsTemplateData: EjsTemplateData = {
-		title:
-			presence.discord_user.global_name || presence.discord_user.username,
+		title: presence.discord_user.global_name || presence.discord_user.username,
 		username:
 			presence.discord_user.global_name || presence.discord_user.username,
 		status: presence.discord_status,

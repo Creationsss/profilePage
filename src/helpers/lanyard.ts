@@ -76,7 +76,7 @@ export async function handleReadMe(data: LanyardData): Promise<string | null> {
 			return null;
 
 		if (res.headers.has("content-length")) {
-			const size: number = parseInt(
+			const size: number = Number.parseInt(
 				res.headers.get("content-length") || "0",
 				10,
 			);

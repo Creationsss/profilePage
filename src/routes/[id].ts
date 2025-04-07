@@ -29,8 +29,7 @@ async function handler(request: ExtendedRequest): Promise<Response> {
 	}
 
 	const presence: LanyardData = data.data;
-	const readme: string | Promise<string> | null =
-		await handleReadMe(presence);
+	const readme: string | Promise<string> | null = await handleReadMe(presence);
 
 	const ejsTemplateData: EjsTemplateData = {
 		title: `${presence.discord_user.username || "Unknown"}`,
