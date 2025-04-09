@@ -40,6 +40,30 @@ body {
 	align-items: center;
 }
 
+.snowflake {
+	position: absolute;
+	background-color: white;
+	border-radius: 50%;
+	pointer-events: none;
+	z-index: 1;
+}
+
+.raindrop {
+	position: absolute;
+	background-color: white;
+	border-radius: 50%;
+	pointer-events: none;
+	z-index: 1;
+}
+
+.hidden {
+	display: none;
+}
+
+.activity-header.hidden {
+	display: none;
+}
+
 .user-card {
 	display: flex;
 	flex-direction: column;

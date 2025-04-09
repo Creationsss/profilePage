@@ -291,7 +291,6 @@ function updatePresence(data) {
 	};
 
 	let status = "offline";
-	console.log(data.activities.some((activity) => activity.type === 1));
 	if (data.activities.some((activity) => activity.type === 1)) {
 		status = "streaming";
 	} else {
@@ -339,11 +338,15 @@ function updatePresence(data) {
 		});
 
 	const activityList = document.querySelector(".activities");
+	const activitiesTitle = document.querySelector(".activity-header");
 
-	if (activityList) {
-		activityList.innerHTML = "";
+	if (activityList && activitiesTitle) {
 		if (filtered?.length) {
 			activityList.innerHTML = filtered.map(buildActivityHTML).join("");
+			activitiesTitle.classList.remove("hidden");
+		} else {
+			activityList.innerHTML = "";
+			activitiesTitle.classList.add("hidden");
 		}
 		updateElapsedAndProgress();
 	}

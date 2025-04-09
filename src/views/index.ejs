@@ -13,6 +13,13 @@
 	<link rel="stylesheet" href="/public/css/index.css">
 	<script src="/public/js/index.js" defer></script>
 
+	<% if (allowSnow) { %>
+		<script src="/public/js/snow.js" defer></script>
+	<% } %>
+	<% if(allowRain) { %>
+		<script src="/public/js/rain.js" defer></script>
+	<% } %>
+
 	<meta name="color-scheme" content="dark">
 </head>
 <body>
@@ -59,152 +66,139 @@
 		let filtered = activities
 			.filter(a => a.type !== 4)
 			.sort((a, b) => {
-				const priority = { 2: 0, 1: 1, 3: 2 }; // Listening, Streaming, Watching ? should i keep this
+				const priority = { 2: 0, 1: 1, 3: 2 };
 				const aPriority = priority[a.type] ?? 99;
 				const bPriority = priority[b.type] ?? 99;
 				return aPriority - bPriority;
 			});
 	%>
-	<% if (filtered.length > 0) { %>
-		<h2>Activities</h2>
-		<ul class="activities">
-			<% filtered.forEach(activity => {
-				const start = activity.timestamps?.start;
-				const end = activity.timestamps?.end;
-				const now = Date.now();
-				const elapsed = start ? now - start : 0;
-				const total = (start && end) ? end - start : null;
-				const progress = (total && elapsed > 0) ? Math.min(100, Math.floor((elapsed / total) * 100)) : null;
 
-				let art = null;
-				let smallArt = null;
+	<h2 class="activity-header <%= filtered.length === 0 ? 'hidden' : '' %>">Activities</h2>
+	<ul class="activities">
+		<% filtered.forEach(activity => {
+			const start = activity.timestamps?.start;
+			const end = activity.timestamps?.end;
+			const now = Date.now();
+			const elapsed = start ? now - start : 0;
+			const total = (start && end) ? end - start : null;
+			const progress = (total && elapsed > 0) ? Math.min(100, Math.floor((elapsed / total) * 100)) : null;
 
-				function resolveActivityImage(img, applicationId) {
-					if (!img) return null;
+			let art = null;
+			let smallArt = null;
 
-					if (img.startsWith("mp:external/")) {
-						return `https://media.discordapp.net/external/${img.slice("mp:external/".length)}`;
-					}
-
-					if (img.includes("/https/")) {
-						const clean = img.split("/https/")[1];
-						return clean ? `https://${clean}` : null;
-					}
-
-					if (img.startsWith("spotify:")) {
-						return `https://i.scdn.co/image/${img.split(":")[1]}`;
-					}
-
-					return `https://cdn.discordapp.com/app-assets/${applicationId}/${img}.png`;
+			function resolveActivityImage(img, applicationId) {
+				if (!img) return null;
+				if (img.startsWith("mp:external/")) {
+					return `https://media.discordapp.net/external/${img.slice("mp:external/".length)}`;
 				}
-
-				if (activity.assets) {
-					art = resolveActivityImage(activity.assets.large_image, activity.application_id);
-					smallArt = resolveActivityImage(activity.assets.small_image, activity.application_id);
+				if (img.includes("/https/")) {
+					const clean = img.split("/https/")[1];
+					return clean ? `https://${clean}` : null;
 				}
+				if (img.startsWith("spotify:")) {
+					return `https://i.scdn.co/image/${img.split(":")[1]}`;
+				}
+				return `https://cdn.discordapp.com/app-assets/${applicationId}/${img}.png`;
+			}
 
-				const activityTypeMap = {
-					0: "Playing",
-					1: "Streaming",
-					2: "Listening",
-					3: "Watching",
-					4: "Custom Status",
-					5: "Competing",
-				};
+			if (activity.assets) {
+				art = resolveActivityImage(activity.assets.large_image, activity.application_id);
+				smallArt = resolveActivityImage(activity.assets.small_image, activity.application_id);
+			}
 
-				const activityType = activity.name === "Spotify"
-					? "Listening to Spotify"
-					: activity.name === "TIDAL"
-					? "Listening to TIDAL"
-					: activityTypeMap[activity.type] || "Playing";
-			%>
-				<li class="activity">
-					<div class="activity-wrapper">
-						<div class="activity-type-wrapper">
-							<span class="activity-type-label" data-type="<%= activity.type %>">
-								<%= activityType %>
-							</span>
-							<% if (start && progress === null) { %>
-								<div class="activity-timestamp" data-start="<%= start %>">
-									<% const started = new Date(start); %>
-									<span>
-										Since: <%= started.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) %> <span class="elapsed"></span>
-									</span>
-								</div>
-							<% } %>
-						</div>
+			const activityTypeMap = {
+				0: "Playing",
+				1: "Streaming",
+				2: "Listening",
+				3: "Watching",
+				4: "Custom Status",
+				5: "Competing",
+			};
 
-						<div class="activity-wrapper-inner">
-							<% if (art) { %>
-								<div class="activity-image-wrapper">
-									<img class="activity-image" src="<%= art %>" alt="Art" <% activity.assets?.large_text ? `title="${activity.assets.large_text}"` : '' %>>
-									<% if (smallArt) { %>
-										<img class="activity-image-small" src="<%= smallArt %>" alt="Small Art" <% activity.assets?.small_text ? `title="${activity.assets.small_text}"` : '' %>>
-									<% } %>
-								</div>
-							<% } %>
-
-							<div class="activity-content">
-								<div class="inner-content">
-									<%
-										const isMusic = activity.type === 2 || activity.type === 3;
-										const primaryLine = isMusic ? activity.details : activity.name;
-										const secondaryLine = isMusic ? activity.state : activity.details;
-										const tertiaryLine = isMusic ? activity.assets?.large_text : activity.state;
-									%>
-									<div class="activity-top">
-										<div class="activity-header <%= progress !== null ? 'no-timestamp' : '' %>">
-											<span class="activity-name"><%= primaryLine %></span>
-										</div>
-
-										<% if (secondaryLine) { %>
-											<div class="activity-detail"><%= secondaryLine %></div>
-										<% } %>
-										<% if (tertiaryLine) { %>
-											<div class="activity-detail"><%= tertiaryLine %></div>
-										<% } %>
-									</div>
-									<div class="activity-bottom">
-										<% if (activity.buttons && activity.buttons.length > 0) { %>
-											<div class="activity-buttons">
-												<% activity.buttons.forEach((button, index) => {
-													const buttonLabel = typeof button === 'string' ? button : button.label;
-													let buttonUrl = null;
-													if (typeof button === 'object' && button.url) {
-														buttonUrl = button.url;
-													}
-													else if (index === 0 && activity.url) {
-														buttonUrl = activity.url;
-													}
-												%>
-													<% if (buttonUrl) { %>
-														<a href="<%= buttonUrl %>" class="activity-button" target="_blank" rel="noopener noreferrer"><%= buttonLabel %></a>
-													<% } %>
-												<% }); %>
-											</div>
-										<% } %>
-									</div>
-								</div>
+			const activityType = activity.name === "Spotify"
+				? "Listening to Spotify"
+				: activity.name === "TIDAL"
+				? "Listening to TIDAL"
+				: activityTypeMap[activity.type] || "Playing";
+		%>
+			<li class="activity">
+				<div class="activity-wrapper">
+					<div class="activity-type-wrapper">
+						<span class="activity-type-label" data-type="<%= activity.type %>"><%= activityType %></span>
+						<% if (start && progress === null) { %>
+							<div class="activity-timestamp" data-start="<%= start %>">
+								<% const started = new Date(start); %>
+								<span>
+									Since: <%= started.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) %> <span class="elapsed"></span>
+								</span>
 							</div>
-						</div>
-
-						<% if (progress !== null) { %>
-							<div class="progress-bar" data-start="<%= start %>" data-end="<%= end %>">
-								<div class="progress-fill" <%= progress !== null ? `style="width: ${progress}%"` : '' %>></div>
-							</div>
-
-							<% if (start && end) { %>
-								<div class="progress-time-labels" data-start="<%= start %>" data-end="<%= end %>">
-									<span class="progress-current"></span>
-									<span class="progress-total"><%= Math.floor((end - start) / 60000) %>:<%= String(Math.floor(((end - start) % 60000) / 1000)).padStart(2, "0") %></span>
-								</div>
-							<% } %>
 						<% } %>
 					</div>
-				</li>
-			<% }) %>
-		</ul>
-	<% } %>
+					<div class="activity-wrapper-inner">
+						<% if (art) { %>
+							<div class="activity-image-wrapper">
+								<img class="activity-image" src="<%= art %>" alt="Art" <%= activity.assets?.large_text ? `title="${activity.assets.large_text}"` : '' %>>
+								<% if (smallArt) { %>
+									<img class="activity-image-small" src="<%= smallArt %>" alt="Small Art" <%= activity.assets?.small_text ? `title="${activity.assets.small_text}"` : '' %>>
+								<% } %>
+							</div>
+						<% } %>
+						<div class="activity-content">
+							<div class="inner-content">
+								<%
+									const isMusic = activity.type === 2 || activity.type === 3;
+									const primaryLine = isMusic ? activity.details : activity.name;
+									const secondaryLine = isMusic ? activity.state : activity.details;
+									const tertiaryLine = isMusic ? activity.assets?.large_text : activity.state;
+								%>
+								<div class="activity-top">
+									<div class="activity-header <%= progress !== null ? 'no-timestamp' : '' %>">
+										<span class="activity-name"><%= primaryLine %></span>
+									</div>
+									<% if (secondaryLine) { %>
+										<div class="activity-detail"><%= secondaryLine %></div>
+									<% } %>
+									<% if (tertiaryLine) { %>
+										<div class="activity-detail"><%= tertiaryLine %></div>
+									<% } %>
+								</div>
+								<div class="activity-bottom">
+									<% if (activity.buttons && activity.buttons.length > 0) { %>
+										<div class="activity-buttons">
+											<% activity.buttons.forEach((button, index) => {
+												const buttonLabel = typeof button === 'string' ? button : button.label;
+												let buttonUrl = null;
+												if (typeof button === 'object' && button.url) {
+													buttonUrl = button.url;
+												} else if (index === 0 && activity.url) {
+													buttonUrl = activity.url;
+												}
+											%>
+												<% if (buttonUrl) { %>
+													<a href="<%= buttonUrl %>" class="activity-button" target="_blank" rel="noopener noreferrer"><%= buttonLabel %></a>
+												<% } %>
+											<% }) %>
+										</div>
+									<% } %>
+								</div>
+							</div>
+						</div>
+					</div>
+					<% if (progress !== null) { %>
+						<div class="progress-bar" data-start="<%= start %>" data-end="<%= end %>">
+							<div class="progress-fill" <%= progress !== null ? `style="width: ${progress}%"` : '' %>></div>
+						</div>
+						<% if (start && end) { %>
+							<div class="progress-time-labels" data-start="<%= start %>" data-end="<%= end %>">
+								<span class="progress-current"></span>
+								<span class="progress-total"><%= Math.floor((end - start) / 60000) %>:<%= String(Math.floor(((end - start) % 60000) / 1000)).padStart(2, "0") %></span>
+							</div>
+						<% } %>
+					<% } %>
+				</div>
+			</li>
+		<% }); %>
+	</ul>
 
 	<% if (readme) { %>
 		<section class="readme">

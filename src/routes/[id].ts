@@ -52,6 +52,8 @@ async function handler(request: ExtendedRequest): Promise<Response> {
 		},
 		instance,
 		readme,
+		allowSnow: presence.kv.snow || false,
+		allowRain: presence.kv.rain || false,
 	};
 
 	return await renderEjsTemplate("index", ejsTemplateData);
