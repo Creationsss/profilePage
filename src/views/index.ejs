@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head data-user-id="<%= user.id %>" data-instance-uri="<%= instance %>">
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,29 +14,31 @@
 	<link rel="stylesheet" href="/public/css/index.css">
 	<script src="/public/js/index.js" defer></script>
 
+	<%= typeof allowSnow %> <%= allowSnow %>
 	<% if (allowSnow) { %>
-		<script src="/public/js/snow.js" defer></script>
+	<script src="/public/js/snow.js" defer></script>
 	<% } %>
 	<% if(allowRain) { %>
-		<script src="/public/js/rain.js" defer></script>
+	<script src="/public/js/rain.js" defer></script>
 	<% } %>
 
 	<meta name="color-scheme" content="dark">
 </head>
+
 <body>
 	<div class="user-card">
 		<div class="avatar-status-wrapper">
 			<div class="avatar-wrapper">
 				<img class="avatar" src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>" alt="Avatar">
 				<% if (user.avatar_decoration_data) { %>
-					<img class="decoration" src="https://cdn.discordapp.com/avatar-decoration-presets/<%= user.avatar_decoration_data.asset %>" alt="Decoration">
+				<img class="decoration" src="https://cdn.discordapp.com/avatar-decoration-presets/<%= user.avatar_decoration_data.asset %>" alt="Decoration">
 				<% } %>
 				<% if (platform.mobile) { %>
-					<svg class="platform-icon mobile-only" viewBox="0 0 1000 1500" fill="#43a25a" aria-label="Mobile" width="17" height="17">
-						<path d="M 187 0 L 813 0 C 916.277 0 1000 83.723 1000 187 L 1000 1313 C 1000 1416.277 916.277 1500 813 1500 L 187 1500 C 83.723 1500 0 1416.277 0 1313 L 0 187 C 0 83.723 83.723 0 187 0 Z M 125 1000 L 875 1000 L 875 250 L 125 250 Z M 500 1125 C 430.964 1125 375 1180.964 375 1250 C 375 1319.036 430.964 1375 500 1375 C 569.036 1375 625 1319.036 625 1250 C 625 1180.964 569.036 1125 500 1125 Z"/>
-					</svg>
+				<svg class="platform-icon mobile-only" viewBox="0 0 1000 1500" fill="#43a25a" aria-label="Mobile" width="17" height="17">
+					<path d="M 187 0 L 813 0 C 916.277 0 1000 83.723 1000 187 L 1000 1313 C 1000 1416.277 916.277 1500 813 1500 L 187 1500 C 83.723 1500 0 1416.277 0 1313 L 0 187 C 0 83.723 83.723 0 187 0 Z M 125 1000 L 875 1000 L 875 250 L 125 250 Z M 500 1125 C 430.964 1125 375 1180.964 375 1250 C 375 1319.036 430.964 1375 500 1375 C 569.036 1375 625 1319.036 625 1250 C 625 1180.964 569.036 1125 500 1125 Z" />
+				</svg>
 				<% } else { %>
-					<div class="status-indicator <%= status %>"></div>
+				<div class="status-indicator <%= status %>"></div>
 				<% } %>
 			</div>
 			<div class="user-info">
@@ -47,16 +50,16 @@
 						? `https://cdn.discordapp.com/emojis/${emoji.id}.${emoji.animated ? "gif" : "png"}`
 						: null;
 				%>
-					<p class="custom-status">
-						<% if (isCustom && emojiUrl) { %>
-							<img src="<%= emojiUrl %>" alt="<%= emoji.name %>" class="custom-emoji">
-						<% } else if (emoji?.name) { %>
-							<%= emoji.name %>
-						<% } %>
-						<% if (activities[0].state) { %>
-							<span class="custom-status-text"><%= activities[0].state %></span>
-						<% } %>
-					</p>
+				<p class="custom-status">
+					<% if (isCustom && emojiUrl) { %>
+					<img src="<%= emojiUrl %>" alt="<%= emoji.name %>" class="custom-emoji">
+					<% } else if (emoji?.name) { %>
+					<%= emoji.name %>
+					<% } %>
+					<% if (activities[0].state) { %>
+					<span class="custom-status-text"><%= activities[0].state %></span>
+					<% } %>
+				</p>
 				<% } %>
 			</div>
 		</div>
@@ -121,51 +124,51 @@
 				? "Listening to TIDAL"
 				: activityTypeMap[activity.type] || "Playing";
 		%>
-			<li class="activity">
-				<div class="activity-wrapper">
-					<div class="activity-type-wrapper">
-						<span class="activity-type-label" data-type="<%= activity.type %>"><%= activityType %></span>
-						<% if (start && progress === null) { %>
-							<div class="activity-timestamp" data-start="<%= start %>">
-								<% const started = new Date(start); %>
-								<span>
-									Since: <%= started.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) %> <span class="elapsed"></span>
-								</span>
-							</div>
+		<li class="activity">
+			<div class="activity-wrapper">
+				<div class="activity-type-wrapper">
+					<span class="activity-type-label" data-type="<%= activity.type %>"><%= activityType %></span>
+					<% if (start && progress === null) { %>
+					<div class="activity-timestamp" data-start="<%= start %>">
+						<% const started = new Date(start); %>
+						<span>
+							Since: <%= started.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) %> <span class="elapsed"></span>
+						</span>
+					</div>
+					<% } %>
+				</div>
+				<div class="activity-wrapper-inner">
+					<% if (art) { %>
+					<div class="activity-image-wrapper">
+						<img class="activity-image" src="<%= art %>" alt="Art" <%= activity.assets?.large_text ? `title="${activity.assets.large_text}"` : '' %>>
+						<% if (smallArt) { %>
+						<img class="activity-image-small" src="<%= smallArt %>" alt="Small Art" <%= activity.assets?.small_text ? `title="${activity.assets.small_text}"` : '' %>>
 						<% } %>
 					</div>
-					<div class="activity-wrapper-inner">
-						<% if (art) { %>
-							<div class="activity-image-wrapper">
-								<img class="activity-image" src="<%= art %>" alt="Art" <%= activity.assets?.large_text ? `title="${activity.assets.large_text}"` : '' %>>
-								<% if (smallArt) { %>
-									<img class="activity-image-small" src="<%= smallArt %>" alt="Small Art" <%= activity.assets?.small_text ? `title="${activity.assets.small_text}"` : '' %>>
-								<% } %>
-							</div>
-						<% } %>
-						<div class="activity-content">
-							<div class="inner-content">
-								<%
+					<% } %>
+					<div class="activity-content">
+						<div class="inner-content">
+							<%
 									const isMusic = activity.type === 2 || activity.type === 3;
 									const primaryLine = isMusic ? activity.details : activity.name;
 									const secondaryLine = isMusic ? activity.state : activity.details;
 									const tertiaryLine = isMusic ? activity.assets?.large_text : activity.state;
 								%>
-								<div class="activity-top">
-									<div class="activity-header <%= progress !== null ? 'no-timestamp' : '' %>">
-										<span class="activity-name"><%= primaryLine %></span>
-									</div>
-									<% if (secondaryLine) { %>
-										<div class="activity-detail"><%= secondaryLine %></div>
-									<% } %>
-									<% if (tertiaryLine) { %>
-										<div class="activity-detail"><%= tertiaryLine %></div>
-									<% } %>
+							<div class="activity-top">
+								<div class="activity-header <%= progress !== null ? 'no-timestamp' : '' %>">
+									<span class="activity-name"><%= primaryLine %></span>
 								</div>
-								<div class="activity-bottom">
-									<% if (activity.buttons && activity.buttons.length > 0) { %>
-										<div class="activity-buttons">
-											<% activity.buttons.forEach((button, index) => {
+								<% if (secondaryLine) { %>
+								<div class="activity-detail"><%= secondaryLine %></div>
+								<% } %>
+								<% if (tertiaryLine) { %>
+								<div class="activity-detail"><%= tertiaryLine %></div>
+								<% } %>
+							</div>
+							<div class="activity-bottom">
+								<% if (activity.buttons && activity.buttons.length > 0) { %>
+								<div class="activity-buttons">
+									<% activity.buttons.forEach((button, index) => {
 												const buttonLabel = typeof button === 'string' ? button : button.label;
 												let buttonUrl = null;
 												if (typeof button === 'object' && button.url) {
@@ -174,36 +177,37 @@
 													buttonUrl = activity.url;
 												}
 											%>
-												<% if (buttonUrl) { %>
-													<a href="<%= buttonUrl %>" class="activity-button" target="_blank" rel="noopener noreferrer"><%= buttonLabel %></a>
-												<% } %>
-											<% }) %>
-										</div>
+									<% if (buttonUrl) { %>
+									<a href="<%= buttonUrl %>" class="activity-button" target="_blank" rel="noopener noreferrer"><%= buttonLabel %></a>
 									<% } %>
+									<% }) %>
 								</div>
+								<% } %>
 							</div>
 						</div>
 					</div>
-					<% if (progress !== null) { %>
-						<div class="progress-bar" data-start="<%= start %>" data-end="<%= end %>">
-							<div class="progress-fill" <%= progress !== null ? `style="width: ${progress}%"` : '' %>></div>
-						</div>
-						<% if (start && end) { %>
-							<div class="progress-time-labels" data-start="<%= start %>" data-end="<%= end %>">
-								<span class="progress-current"></span>
-								<span class="progress-total"><%= Math.floor((end - start) / 60000) %>:<%= String(Math.floor(((end - start) % 60000) / 1000)).padStart(2, "0") %></span>
-							</div>
-						<% } %>
-					<% } %>
 				</div>
-			</li>
+				<% if (progress !== null) { %>
+				<div class="progress-bar" data-start="<%= start %>" data-end="<%= end %>">
+					<div class="progress-fill" <%= progress !== null ? `style="width: ${progress}%"` : '' %>></div>
+				</div>
+				<% if (start && end) { %>
+				<div class="progress-time-labels" data-start="<%= start %>" data-end="<%= end %>">
+					<span class="progress-current"></span>
+					<span class="progress-total"><%= Math.floor((end - start) / 60000) %>:<%= String(Math.floor(((end - start) % 60000) / 1000)).padStart(2, "0") %></span>
+				</div>
+				<% } %>
+				<% } %>
+			</div>
+		</li>
 		<% }); %>
 	</ul>
 
 	<% if (readme) { %>
-		<section class="readme">
-			<div class="markdown-body"><%- readme %></div>
-		</section>
+	<section class="readme">
+		<div class="markdown-body"><%- readme %></div>
+	</section>
 	<% } %>
 </body>
+
 </html>

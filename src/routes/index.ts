@@ -37,6 +37,8 @@ async function handler(): Promise<Response> {
 		status = presence.discord_status;
 	}
 
+	console.log(presence.kv.rain);
+
 	const ejsTemplateData: EjsTemplateData = {
 		title: presence.discord_user.global_name || presence.discord_user.username,
 		username:
@@ -51,9 +53,12 @@ async function handler(): Promise<Response> {
 		},
 		instance,
 		readme,
-		allowSnow: presence.kv.snow || false,
-		allowRain: presence.kv.rain || false,
+		allowSnow: presence.kv.snow === "true",
+		allowRain: presence.kv.rain === "true",
 	};
+
+	console.log("allowSnow", presence.kv.snow);
+	console.log("allowRain", presence.kv.rain);
 
 	return await renderEjsTemplate("index", ejsTemplateData);
 }
