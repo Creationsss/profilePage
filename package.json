@@ -5,7 +5,7 @@
 	"scripts": {
 		"start": "bun run src/index.ts",
 		"dev": "bun run --hot src/index.ts --dev",
-		"lint": "bunx biome check",
+		"lint": "bunx biome ci . --verbose",
 		"lint:fix": "bunx biome check --fix",
 		"cleanup": "rm -rf logs node_modules bun.lockdb"
 	},
