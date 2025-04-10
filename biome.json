@@ -17,6 +17,12 @@
 	"organizeImports": {
 		"enabled": true
 	},
+	"css": {
+		"formatter": {
+			"indentStyle": "tab",
+			"lineEnding": "lf"
+		}
+	},
 	"linter": {
 		"enabled": true,
 		"rules": {

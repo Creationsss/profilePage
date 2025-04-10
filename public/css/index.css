@@ -1,34 +1,3 @@
-:root {
-	--background: #0e0e10;
-	--card-bg: #1e1f22;
-	--card-hover-bg: #2a2a2d;
-	--border-color: #2e2e30;
-
-	--text-color: #ffffff;
-	--text-subtle: #bbb;
-	--text-secondary: #b5bac1;
-	--text-muted: #888;
-	--link-color: #00b0f4;
-
-	--status-online: #23a55a;
-	--status-idle: #f0b232;
-	--status-dnd: #e03e3e;
-	--status-offline: #747f8d;
-	--status-streaming: #b700ff;
-
-	--progress-bg: #f23f43;
-	--progress-fill: #5865f2;
-
-	--button-bg: #5865f2;
-	--button-hover-bg: #4752c4;
-	--button-disabled-bg: #2d2e31;
-
-	--blockquote-color: #aaa;
-	--code-bg: #2e2e30;
-
-	--readme-bg: #1a1a1d;
-}
-
 body {
 	font-family: system-ui, sans-serif;
 	background-color: var(--background);

@@ -13,3 +13,10 @@ type RouteModule = {
 	) => Promise<Response> | Response;
 	routeDef: RouteDef;
 };
+
+type Palette = Awaited<ReturnType<typeof Vibrant.prototype.getPalette>>;
+type Swatch = Awaited<ReturnType<typeof Vibrant.prototype.getSwatches>>;
+type ImageColorResult = {
+	img: string;
+	colors: Palette | Record<string, string>;
+};
