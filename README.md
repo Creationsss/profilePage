@@ -84,4 +84,4 @@ Make sure your `.env` file is correctly configured before starting.
 
 ## License
 
-[MIT](/license)
+[MIT](/LICENSE)
