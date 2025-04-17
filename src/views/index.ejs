@@ -5,9 +5,14 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-	<meta property="og:title" content="<%= username %>'s Presence">
+	<%
+	const displayName = username.endsWith('s') ? `${username}'` : `${username}'s`;
+	const profileUrl = `https://discord.com/users/${user.id}`;
+	%>
+	<meta property="og:title" content="<%= displayName %> Discord Presence">
+	<meta property="og:description" content="<%= activities?.[0]?.state || 'See what ' + displayName + ' is doing on Discord.' %>">
 	<meta property="og:image" content="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>">
-	<meta property="og:description" content="<%= activities[0]?.state || 'Discord Presence' %>">
+	<meta name="twitter:card" content="summary_large_image">
 
 	<title><%= title %></title>
 

@@ -225,16 +225,17 @@ class ServerHandler {
 			);
 		}
 
-		const headers: Headers = response.headers;
-		let ip: string | null = server.requestIP(request)?.address || null;
+		const headers = request.headers;
+		let ip = server.requestIP(request)?.address;
 
-		if (!ip) {
+		if (!ip || ip.startsWith("172.") || ip === "127.0.0.1") {
 			ip =
-				headers.get("CF-Connecting-IP") ||
-				headers.get("X-Real-IP") ||
-				headers.get("X-Forwarded-For") ||
-				null;
+				headers.get("CF-Connecting-IP")?.trim() ||
+				headers.get("X-Real-IP")?.trim() ||
+				headers.get("X-Forwarded-For")?.split(",")[0].trim() ||
+				"unknown";
 		}
+
 
 		logger.custom(
 			`[${request.method}]`,
