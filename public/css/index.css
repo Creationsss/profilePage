@@ -494,7 +494,9 @@ ul {
 
 /* readme :p */
 .readme {
-	max-width: 700px;
+	max-width: fit-content;
+	min-width: 700px;
+	overflow: hidden;
 	width: 100%;
 	background: var(--readme-bg);
 	padding: 1.5rem;

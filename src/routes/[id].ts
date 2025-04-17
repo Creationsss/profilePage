@@ -1,3 +1,4 @@
+import { getImageColors } from "@/helpers/colors";
 import { lanyardConfig } from "@config/environment";
 import { renderEjsTemplate } from "@helpers/ejs";
 import { getLanyardData, handleReadMe } from "@helpers/lanyard";
@@ -38,6 +39,14 @@ async function handler(request: ExtendedRequest): Promise<Response> {
 		status = presence.discord_status;
 	}
 
+	let colors: ImageColorResult | null = null;
+	if (presence.kv.colors === "true") {
+		const avatar: string = presence.discord_user.avatar
+			? `https://cdn.discordapp.com/avatars/${presence.discord_user.id}/${presence.discord_user.avatar}`
+			: `https://cdn.discordapp.com/embed/avatars/${presence.discord_user.discriminator || 1 % 5}`;
+		colors = await getImageColors(avatar, true);
+	}
+
 	const ejsTemplateData: EjsTemplateData = {
 		title: presence.discord_user.global_name || presence.discord_user.username,
 		username:
@@ -52,8 +61,9 @@ async function handler(request: ExtendedRequest): Promise<Response> {
 		},
 		instance,
 		readme,
-		allowSnow: presence.kv.snow || false,
-		allowRain: presence.kv.rain || false,
+		allowSnow: presence.kv.snow === "true",
+		allowRain: presence.kv.rain === "true",
+		colors: colors?.colors ?? {},
 	};
 
 	return await renderEjsTemplate("index", ejsTemplateData);

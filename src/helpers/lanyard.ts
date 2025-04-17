@@ -49,11 +49,12 @@ export async function getLanyardData(id?: string): Promise<LanyardResponse> {
 
 export async function handleReadMe(data: LanyardData): Promise<string | null> {
 	const userReadMe: string | null = data.kv?.readme;
+	const validExtension = /\.(md|markdown|txt|html?)$/i;
 
 	if (
 		!userReadMe ||
-		!userReadMe.toLowerCase().endsWith("readme.md") ||
-		!userReadMe.startsWith("http")
+		!userReadMe.startsWith("http") ||
+		!validExtension.test(userReadMe)
 	) {
 		return null;
 	}
@@ -65,15 +66,7 @@ export async function handleReadMe(data: LanyardData): Promise<string | null> {
 			},
 		});
 
-		const contentType: string = res.headers.get("content-type") || "";
-		if (
-			!res.ok ||
-			!(
-				contentType.includes("text/markdown") ||
-				contentType.includes("text/plain")
-			)
-		)
-			return null;
+		if (!res.ok) return null;
 
 		if (res.headers.has("content-length")) {
 			const size: number = Number.parseInt(
@@ -86,9 +79,17 @@ export async function handleReadMe(data: LanyardData): Promise<string | null> {
 		const text: string = await res.text();
 		if (!text || text.length < 10) return null;
 
-		const html: string | null = await marked.parse(text);
-		const safe: string | null = DOMPurify.sanitize(html);
+		let html: string;
+		if (
+			userReadMe.toLowerCase().endsWith(".html") ||
+			userReadMe.toLowerCase().endsWith(".htm")
+		) {
+			html = text;
+		} else {
+			html = await marked.parse(text);
+		}
 
+		const safe: string | null = DOMPurify.sanitize(html);
 		return safe;
 	} catch {
 		return null;
