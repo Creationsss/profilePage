@@ -45,7 +45,10 @@ body {
 .avatar-status-wrapper {
 	display: flex;
 	align-items: center;
-	gap: 1.5rem;
+	gap: 2rem;
+
+	width: fit-content;
+	max-width: 700px;
 }
 
 .avatar-wrapper {
@@ -114,6 +117,48 @@ body {
 .user-info {
 	display: flex;
 	flex-direction: column;
+}
+
+.user-info-inner {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	text-align: center;
+	gap: .5rem;
+}
+
+.user-info-inner h1 {
+	font-size: 2rem;
+	margin: 0;
+}
+
+.clan-badge {
+	width: 50px;
+	height: 20px;
+	border-radius: 8px;
+	background-color: var(--card-bg);
+
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	gap: 0.3rem;
+	padding: 0.2rem 0.3rem;
+}
+
+.clan-badge img {
+	width: 20px;
+	height: 20px;
+	margin: 0;
+	padding: 0;
+}
+
+.clan-badge span {
+	font-size: 1rem;
+	color: var(--text-color);
+	margin: 0;
+
+	font-weight: 600;
 }
 
 h1 {
