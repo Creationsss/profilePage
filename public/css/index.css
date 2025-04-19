@@ -129,11 +129,14 @@ body {
 
 .platform-icon.mobile-only {
 	position: absolute;
-	bottom: 4px;
+	bottom: 0;
 	right: 4px;
 	width: 30px;
 	height: 30px;
 	pointer-events: none;
+	background-color: var(--background);
+	padding: 0.3rem 0.1rem;
+	border-radius: 8px;
 }
 
 .user-info {
