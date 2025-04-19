@@ -26,7 +26,7 @@ body {
 }
 
 .hidden {
-	display: none;
+	display: none !important;
 }
 
 .activity-header.hidden {
@@ -60,6 +60,28 @@ body {
 .avatar {
 	width: 128px;
 	height: 128px;
+	border-radius: 50%;
+}
+
+.badges {
+	max-width: 700px;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	gap: 0.3rem;
+	flex-wrap: wrap;
+	margin-top: 0.5rem;
+	padding: 0.5rem;
+	background-color: var(--card-bg);
+	border-radius: 10px;
+	border: 1px solid var(--border-color);
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.badge {
+	width: 26px;
+	height: 26px;
 	border-radius: 50%;
 }
 
@@ -143,7 +165,11 @@ body {
 	align-items: center;
 	justify-content: center;
 	gap: 0.3rem;
-	padding: 0.2rem 0.3rem;
+	padding: .4rem 0.5rem;
+
+	text-align: center;
+	align-items: center;
+	justify-content: center;
 }
 
 .clan-badge img {
@@ -154,7 +180,7 @@ body {
 }
 
 .clan-badge span {
-	font-size: 1rem;
+	font-size: .9rem;
 	color: var(--text-color);
 	margin: 0;
 
@@ -409,6 +435,14 @@ ul {
 		align-items: center;
 	}
 
+	.badges {
+		max-width: 100%;
+		border-radius: 0;
+		border: none;
+		background-color: transparent;
+		margin-top: 0;
+	}
+
 	.avatar-status-wrapper {
 		flex-direction: column;
 		align-items: center;
@@ -548,7 +582,7 @@ ul {
 	border-radius: 8px;
 	border: 1px solid var(--border-color);
 
-	margin-top: 2rem;
+	margin-top: 1rem;
 
 	box-sizing: border-box;
 	overflow: hidden;
@@ -626,7 +660,8 @@ ul {
 
 @media (max-width: 600px) {
 	.readme {
-		width: 100%;
+		max-width: 100%;
+		min-width: 100%;
 		padding: 1rem;
 
 		margin-top: 1rem;

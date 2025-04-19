@@ -84,6 +84,7 @@ setInterval(updateElapsedAndProgress, 1000);
 const head = document.querySelector("head");
 const userId = head?.dataset.userId;
 let instanceUri = head?.dataset.instanceUri;
+let badgeURL = head?.dataset.badgeUrl;
 
 if (userId && instanceUri) {
 	if (!instanceUri.startsWith("http")) {
@@ -274,6 +275,79 @@ function buildActivityHTML(activity) {
 			</div>
 		</li>
 	`;
+}
+
+if (badgeURL && badgeURL !== "null" && userId) {
+	if (!badgeURL.startsWith("http")) {
+		badgeURL = `https://${badgeURL}`;
+	}
+
+	if (!badgeURL.endsWith("/")) {
+		badgeURL += "/";
+	}
+
+	async function loadBadges(userId, options = {}) {
+		const {
+			services = [],
+			seperated = false,
+			cache = true,
+			targetId = "badges",
+		} = options;
+
+		const params = new URLSearchParams();
+		if (services.length) params.set("services", services.join(","));
+		if (seperated) params.set("seperated", "true");
+		if (!cache) params.set("cache", "false");
+
+		const url = `${badgeURL}${userId}?${params.toString()}`;
+		const target = document.getElementById(targetId);
+		if (!target) return;
+
+		target.classList.add("hidden");
+
+		try {
+			const res = await fetch(url);
+			const json = await res.json();
+
+			if (!res.ok || !json.badges) {
+				target.textContent = "Failed to load badges.";
+				return;
+			}
+
+			const badges = Array.isArray(json.badges)
+				? json.badges
+				: Object.values(json.badges).flat();
+
+			if (badges.length === 0) {
+				target.innerHTML = "";
+				target.classList.add("hidden");
+				return;
+			}
+
+			target.innerHTML = "";
+			for (const badge of badges) {
+				const img = document.createElement("img");
+				img.src = badge.badge;
+				img.alt = badge.tooltip;
+				img.title = badge.tooltip;
+				img.className = "badge";
+				target.appendChild(img);
+			}
+
+			target.classList.remove("hidden");
+		} catch (err) {
+			console.error(err);
+			target.innerHTML = "";
+			target.classList.add("hidden");
+		}
+	}
+
+	loadBadges(userId, {
+		services: [],
+		seperated: false,
+		cache: true,
+		targetId: "badges",
+	});
 }
 
 function updatePresence(data) {

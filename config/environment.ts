@@ -9,3 +9,5 @@ export const lanyardConfig: LanyardConfig = {
 	userId: process.env.LANYARD_USER_ID || "",
 	instance: process.env.LANYARD_INSTANCE || "https://api.lanyard.rest",
 };
+
+export const badgeApi: string | null = process.env.BADGE_API_URL || null;

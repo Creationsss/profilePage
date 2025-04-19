@@ -236,7 +236,6 @@ class ServerHandler {
 				"unknown";
 		}
 
-
 		logger.custom(
 			`[${request.method}]`,
 			`(${response.status})`,

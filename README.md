@@ -36,6 +36,7 @@ cp .env.example .env
 | `PORT`             | Port to run the server on (default: `8080`)      |
 | `LANYARD_USER_ID`  | Your Discord user ID                             |
 | `LANYARD_INSTANCE` | Lanyard WebSocket endpoint URL                   |
+| `BADGE_API_URL`    | Uses the [badge api](https://git.creations.works/creations/badgeAPI) only required if you want to use badges
 
 #### Optional Lanyard KV Vars (per-user customization)
 

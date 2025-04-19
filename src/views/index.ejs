@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head data-user-id="<%= user.id %>" data-instance-uri="<%= instance %>">
+<head data-user-id="<%= user.id %>" data-instance-uri="<%= instance %>" data-badge-url="<%= badgeApi %>">
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -50,7 +50,7 @@
 			<div class="user-info">
 				<div class="user-info-inner">
 					<h1><%= username %></h1>
-					<% if (user.clan) { %>
+					<% if (user.clan && user.clan.tag) { %>
 						<div class="clan-badge">
 							<img src="https://cdn.discordapp.com/clan-badges/<%= user.clan.identity_guild_id %>/<%= user.clan.badge %>" alt="Clan Badge" class="clan-badge">
 							<span class="clan-name"><%= user.clan.tag %></span>
@@ -79,6 +79,9 @@
 		</div>
 	</div>
 
+	<% if(badgeApi) { %>
+	<div id="badges" class="badges"></div>
+	<% } %>
 	<%
 		let filtered = activities
 			.filter(a => a.type !== 4)

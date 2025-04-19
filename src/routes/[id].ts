@@ -1,5 +1,5 @@
 import { getImageColors } from "@/helpers/colors";
-import { lanyardConfig } from "@config/environment";
+import { badgeApi, lanyardConfig } from "@config/environment";
 import { renderEjsTemplate } from "@helpers/ejs";
 import { getLanyardData, handleReadMe } from "@helpers/lanyard";
 
@@ -64,6 +64,7 @@ async function handler(request: ExtendedRequest): Promise<Response> {
 		allowSnow: presence.kv.snow === "true",
 		allowRain: presence.kv.rain === "true",
 		colors: colors?.colors ?? {},
+		badgeApi: badgeApi,
 	};
 
 	return await renderEjsTemplate("index", ejsTemplateData);
