@@ -19,11 +19,14 @@
 	<link rel="stylesheet" href="/public/css/index.css">
 	<script src="/public/js/index.js" defer></script>
 
-	<% if (allowSnow) { %>
+	<% if (extraOptions.snow) { %>
 	<script src="/public/js/snow.js" defer></script>
 	<% } %>
-	<% if(allowRain) { %>
+	<% if(extraOptions.rain) { %>
 	<script src="/public/js/rain.js" defer></script>
+	<% } %>
+	<% if (extraOptions.stars) { %>
+	<script src="/public/js/stars.js" defer></script>
 	<% } %>
 
 	<meta name="color-scheme" content="dark">

@@ -59,12 +59,15 @@ async function handler(request: ExtendedRequest): Promise<Response> {
 			mobile: presence.active_on_discord_mobile,
 			web: presence.active_on_discord_web,
 		},
-		instance,
-		readme,
-		allowSnow: presence.kv.snow === "true",
-		allowRain: presence.kv.rain === "true",
-		colors: colors?.colors ?? {},
+		instance: instance,
+		readme: readme,
 		badgeApi: badgeApi,
+		colors: colors?.colors ?? {},
+		extraOptions: {
+			snow: presence.kv.snow === "true",
+			rain: presence.kv.rain === "true",
+			stars: presence.kv.stars === "true",
+		}
 	};
 
 	return await renderEjsTemplate("index", ejsTemplateData);
