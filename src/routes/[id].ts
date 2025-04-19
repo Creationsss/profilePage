@@ -61,7 +61,7 @@ async function handler(request: ExtendedRequest): Promise<Response> {
 		},
 		instance: instance,
 		readme: readme,
-		badgeApi: badgeApi,
+		badgeApi: presence.kv.badges === "true" ? badgeApi : null,
 		colors: colors?.colors ?? {},
 		extraOptions: {
 			snow: presence.kv.snow === "true",

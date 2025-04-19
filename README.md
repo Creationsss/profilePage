@@ -47,7 +47,9 @@ These are expected to be defined in Lanyard's KV store:
 | `snow`    | Enables snow background effect (`true`)                     |
 | `rain`    | Enables rain background effect (`true`)                     |
 | `readme`  | URL to a README file displayed on your profile              |
+| `stars`   | Enables stars background effect (`true`)                    |
 | `colors`  | Enables avatar-based color theme (uses `node-vibrant`)      |
+| `badges`  | Enables or disables fetching of badges per user             |
 
 ---
 
