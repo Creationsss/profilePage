@@ -66,7 +66,7 @@ async function handler(): Promise<Response> {
 			snow: presence.kv.snow === "true",
 			rain: presence.kv.rain === "true",
 			stars: presence.kv.stars === "true",
-		}
+		},
 	};
 
 	return await renderEjsTemplate("index", ejsTemplateData);

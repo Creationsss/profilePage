@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 		let x = Math.random() * window.innerWidth * 0.8;
 		let y = Math.random() * window.innerHeight * 0.3;
-		const angle = Math.random() * Math.PI / 6 + Math.PI / 8;
+		const angle = (Math.random() * Math.PI) / 6 + Math.PI / 8;
 		const speed = 10;
 		const totalFrames = 60;
 
