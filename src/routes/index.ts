@@ -4,6 +4,10 @@ export const routeDef = {
 	...idRouteDef,
 };
 
-export const handler = async (request: ExtendedRequest, body: unknown, server: BunServer) => {
+export const handler = async (
+	request: ExtendedRequest,
+	body: unknown,
+	server: BunServer,
+) => {
 	return await idHandler(request);
 };

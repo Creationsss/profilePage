@@ -248,7 +248,7 @@ function buildActivityHTML(activity) {
 					${activity.assets?.large_text ? `title="${activity.assets.large_text}"` : ""}
 				/>
 				${`<img class="activity-image-small ${smallArt ?? "no-asset"}" src="${smallArt ?? ""}" ${activity.assets?.small_text ? `title="${activity.assets.small_text}"` : ""}>`}
-			</div>`
+			</div>`;
 
 	return `
 		<li class="activity">
@@ -431,7 +431,9 @@ function updatePresence(data) {
 }
 
 async function getAllNoAsset() {
-	const noAssetImages = document.querySelectorAll("img.activity-image.no-asset");
+	const noAssetImages = document.querySelectorAll(
+		"img.activity-image.no-asset",
+	);
 
 	console.log("Images with .no-asset:", noAssetImages.length, noAssetImages);
 

@@ -17,11 +17,14 @@ async function fetchSteamGridIcon(gameName: string): Promise<string | null> {
 	const cached = await redis.get(cacheKey);
 	if (cached) return cached;
 
-	const search = await fetch(`https://www.steamgriddb.com/api/v2/search/autocomplete/${encodeURIComponent(gameName)}`, {
-		headers: {
-			Authorization: `Bearer ${steamGridDbKey}`,
+	const search = await fetch(
+		`https://www.steamgriddb.com/api/v2/search/autocomplete/${encodeURIComponent(gameName)}`,
+		{
+			headers: {
+				Authorization: `Bearer ${steamGridDbKey}`,
+			},
 		},
-	});
+	);
 
 	if (!search.ok) return null;
 
@@ -31,11 +34,14 @@ async function fetchSteamGridIcon(gameName: string): Promise<string | null> {
 	const gameId = data[0]?.id;
 	if (!gameId) return null;
 
-	const iconRes = await fetch(`https://www.steamgriddb.com/api/v2/icons/game/${gameId}`, {
-		headers: {
-			Authorization: `Bearer ${steamGridDbKey}`,
+	const iconRes = await fetch(
+		`https://www.steamgriddb.com/api/v2/icons/game/${gameId}`,
+		{
+			headers: {
+				Authorization: `Bearer ${steamGridDbKey}`,
+			},
 		},
-	});
+	);
 
 	if (!iconRes.ok) return null;
 
@@ -53,20 +59,26 @@ async function handler(request: ExtendedRequest): Promise<Response> {
 	if (!steamGridDbKey) {
 		return Response.json(
 			{ status: 503, error: "Route disabled due to missing SteamGridDB key" },
-			{ status: 503 }
+			{ status: 503 },
 		);
 	}
 
 	const { game } = request.params;
 
 	if (!game || typeof game !== "string" || game.length < 2) {
-		return Response.json({ status: 400, error: "Missing or invalid game name" }, { status: 400 });
+		return Response.json(
+			{ status: 400, error: "Missing or invalid game name" },
+			{ status: 400 },
+		);
 	}
 
 	const icon = await fetchSteamGridIcon(game);
 
 	if (!icon) {
-		return Response.json({ status: 404, error: "Icon not found" }, { status: 404 });
+		return Response.json(
+			{ status: 404, error: "Icon not found" },
+			{ status: 404 },
+		);
 	}
 
 	return Response.json(
@@ -75,7 +87,7 @@ async function handler(request: ExtendedRequest): Promise<Response> {
 			game,
 			icon,
 		},
-		{ status: 200 }
+		{ status: 200 },
 	);
 }
 
