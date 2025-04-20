@@ -167,6 +167,22 @@ body {
 	border-radius: 8px;
 }
 
+.platform-icon.mobile-only.dnd {
+	fill: var(--status-dnd);
+}
+.platform-icon.mobile-only.idle {
+	fill: var(--status-idle);
+}
+.platform-icon.mobile-only.online {
+	fill: var(--status-online);
+}
+.platform-icon.mobile-only.offline {
+	fill: var(--status-offline);
+}
+.platform-icon.mobile-only.streaming {
+	fill: var(--status-streaming);
+}
+
 .user-info {
 	display: flex;
 	flex-direction: column;
