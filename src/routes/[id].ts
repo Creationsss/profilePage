@@ -11,7 +11,7 @@ const routeDef: RouteDef = {
 
 async function handler(request: ExtendedRequest): Promise<Response> {
 	const { id } = request.params;
-	const data: LanyardResponse = await getLanyardData(id);
+	const data: LanyardResponse = await getLanyardData(id || lanyardConfig.userId);
 
 	if (!data.success) {
 		return await renderEjsTemplate("error", {
