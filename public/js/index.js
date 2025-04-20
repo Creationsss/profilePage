@@ -240,12 +240,15 @@ function buildActivityHTML(activity) {
 	const secondaryLine = isMusic ? activity.state : activity.details;
 	const tertiaryLine = isMusic ? activity.assets?.large_text : activity.state;
 
-	const activityArt = art
-		? `<div class="activity-image-wrapper">
-				<img class="activity-image" src="${art}" alt="Art" ${activity.assets?.large_text ? `title="${activity.assets.large_text}"` : ""}>
-				${smallArt ? `<img class="activity-image-small" src="${smallArt}" alt="Small Art" ${activity.assets?.small_text ? `title="${activity.assets.small_text}"` : ""}>` : ""}
+	const activityArt = `<div class="activity-image-wrapper ${art ?? "no-asset"}">
+				<img
+					class="activity-image${!art ? " no-asset" : ""}"
+					src="${art ?? ""}"
+					data-name="${activity.name}"
+					${activity.assets?.large_text ? `title="${activity.assets.large_text}"` : ""}
+				/>
+				${`<img class="activity-image-small ${smallArt ?? "no-asset"}" src="${smallArt ?? ""}" ${activity.assets?.small_text ? `title="${activity.assets.small_text}"` : ""}>`}
 			</div>`
-		: "";
 
 	return `
 		<li class="activity">
@@ -423,5 +426,31 @@ function updatePresence(data) {
 			activitiesTitle.classList.add("hidden");
 		}
 		updateElapsedAndProgress();
+		getAllNoAsset();
+	}
+}
+
+async function getAllNoAsset() {
+	const noAssetImages = document.querySelectorAll("img.activity-image.no-asset");
+
+	console.log("Images with .no-asset:", noAssetImages.length, noAssetImages);
+
+	for (const img of noAssetImages) {
+		const name = img.dataset.name;
+		if (!name) continue;
+
+		try {
+			const res = await fetch(`/api/art/${encodeURIComponent(name)}`);
+			if (!res.ok) continue;
+
+			const { icon } = await res.json();
+			if (icon) {
+				img.src = icon;
+				img.classList.remove("no-asset");
+				img.parentElement.classList.remove("no-asset");
+			}
+		} catch (err) {
+			console.warn(`Failed to fetch fallback icon for "${name}"`, err);
+		}
 	}
 }

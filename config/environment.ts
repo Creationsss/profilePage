@@ -5,9 +5,15 @@ export const environment: Environment = {
 		process.env.NODE_ENV === "development" || process.argv.includes("--dev"),
 };
 
+export const redisTtl: number = process.env.REDIS_TTL
+	? Number.parseInt(process.env.REDIS_TTL, 10)
+	: 60 * 60 * 1; // 1 hour
+
 export const lanyardConfig: LanyardConfig = {
 	userId: process.env.LANYARD_USER_ID || "",
 	instance: process.env.LANYARD_INSTANCE || "https://api.lanyard.rest",
 };
 
 export const badgeApi: string | null = process.env.BADGE_API_URL || null;
+export const steamGridDbKey: string | undefined =
+	process.env.STEAMGRIDDB_API_KEY;

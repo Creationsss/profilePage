@@ -32,9 +32,9 @@
 	<meta name="color-scheme" content="dark">
 </head>
 
-<%- include("partial/style.ejs") %>
-
 <body>
+	<%- include("partial/style.ejs") %>
+
 	<div class="user-card">
 		<div class="avatar-status-wrapper">
 			<div class="avatar-wrapper">
@@ -54,10 +54,10 @@
 				<div class="user-info-inner">
 					<h1><%= username %></h1>
 					<% if (user.clan && user.clan.tag) { %>
-						<div class="clan-badge">
-							<img src="https://cdn.discordapp.com/clan-badges/<%= user.clan.identity_guild_id %>/<%= user.clan.badge %>" alt="Clan Badge" class="clan-badge">
-							<span class="clan-name"><%= user.clan.tag %></span>
-						</div>
+					<div class="clan-badge">
+						<img src="https://cdn.discordapp.com/clan-badges/<%= user.clan.identity_guild_id %>/<%= user.clan.badge %>" alt="Clan Badge" class="clan-badge">
+						<span class="clan-name"><%= user.clan.tag %></span>
+					</div>
 					<% } %>
 				</div>
 				<% if (activities.length && activities[0].type === 4) {
@@ -158,14 +158,10 @@
 					<% } %>
 				</div>
 				<div class="activity-wrapper-inner">
-					<% if (art) { %>
-					<div class="activity-image-wrapper">
-						<img class="activity-image" src="<%= art %>" alt="Art" <%= activity.assets?.large_text ? `title="${activity.assets.large_text}"` : '' %>>
-						<% if (smallArt) { %>
-						<img class="activity-image-small" src="<%= smallArt %>" alt="Small Art" <%= activity.assets?.small_text ? `title="${activity.assets.small_text}"` : '' %>>
-						<% } %>
+					<div class="activity-image-wrapper <%= art ?? "no-asset" %>">
+						<img class="activity-image <%= art ? '' : 'no-asset' %>" src="<%= art || '' %>" data-name="<%= activity.name.replace(/"/g, '&quot;') %>" <%= activity.assets?.large_text ? `title="${activity.assets.large_text}"` : '' %>>
+						<img class="activity-image-small <%= smallArt ?? "no-asset" %>" src="<%= smallArt %>" <%= activity.assets?.small_text ? `title="${activity.assets.small_text}"` : '' %>>
 					</div>
-					<% } %>
 					<div class="activity-content">
 						<div class="inner-content">
 							<%

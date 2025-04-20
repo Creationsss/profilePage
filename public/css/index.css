@@ -316,6 +316,10 @@ ul {
 	height: 80px;
 }
 
+.no-asset {
+	display: none !important;
+}
+
 .activity-image-small {
 	width: 25px;
 	height: 25px;
