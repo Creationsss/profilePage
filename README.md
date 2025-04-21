@@ -2,19 +2,32 @@
 
 A cool little web app that shows your Discord profile, current activity, and more. Built with Bun and EJS.
 
+---
+
 ## Requirements
 
-This project relies on the following services to function correctly:
+This project depends on the following services to function properly:
 
 ### 1. Lanyard Backend
 
-This project depends on a self-hosted or public [Lanyard](https://github.com/Phineas/lanyard) instance for Discord presence data.
-Make sure Lanyard is running and accessible before using this profile page.
+This project depends on a self-hosted or public [Lanyard](https://github.com/Phineas/lanyard) instance to fetch real-time Discord presence data.
+Make sure the Lanyard instance is running and accessible before using this.
 
 ### 2. Redis Instance
 
-A Redis-compatible key-value store is required for caching third-party data (e.g., SteamGridDB icons).
-We recommend using [Dragonfly](https://www.dragonflydb.io/) as a high-performance drop-in replacement for Redis.
+A Redis-compatible key-value store is required to cache third-party data (e.g., SteamGridDB icons).
+I recommend [Dragonfly](https://www.dragonflydb.io/), a high-performance drop-in replacement for Redis.
+
+### 3. Badge API
+
+A lightweight API to render Discord-style badges.
+>Only needed if you want to show badges on profiles:
+https://git.creations.works/creations/badgeAPI
+
+### 4. SteamGridDB
+
+>You only have to use this if you want to fetch game icons that Discord doesn’t provide:
+https://www.steamgriddb.com/api/v2
 
 ---
 
@@ -36,39 +49,38 @@ Copy the example environment file and update it:
 cp .env.example .env
 ```
 
-#### Required `.env` Variables
+#### `.env` Variables
 
-| Variable           | Description                                      |
-|--------------------|--------------------------------------------------|
-| `HOST`             | Host to bind the Bun server (default: `0.0.0.0`) |
-| `PORT`             | Port to run the server on (default: `8080`)      |
-| `REDIS_URL`        | Redis connection string                          |
-| `LANYARD_USER_ID`  | Your Discord user ID                             |
-| `LANYARD_INSTANCE` | Lanyard WebSocket endpoint URL                   |
-| `BADGE_API_URL`    | Uses the [badge api](https://git.creations.works/creations/badgeAPI) only required if you want to use badges |
+| Variable              | Description                                                                 |
+|-----------------------|-----------------------------------------------------------------------------|
+| `HOST`                | Host to bind the Bun server (default: `0.0.0.0`)                            |
+| `PORT`                | Port to run the server on (default: `8080`)                                 |
+| `REDIS_URL`           | Redis connection string                                                     |
+| `LANYARD_USER_ID`     | Your Discord user ID, for the default page                                  |
+| `LANYARD_INSTANCE`    | Endpoint of the Lanyard instance                                            |
+| `BADGE_API_URL`       | Badge API URL ([badgeAPI](https://git.creations.works/creations/badgeAPI))  |
+| `STEAMGRIDDB_API_KEY` | SteamGridDB API key for fetching game icons                                 |
 
-#### Optional Lanyard KV Vars (per-user customization)
+#### Optional Lanyard KV Variables (per-user customization)
 
-These are expected to be defined in Lanyard's KV store:
+These can be defined in Lanyard's KV store to customize the page:
 
-| Variable  | Description                                                 |
-|-----------|-------------------------------------------------------------|
-| `snow`    | Enables snow background effect (`true`)                     |
-| `rain`    | Enables rain background effect (`true`)                     |
-| `readme`  | URL to a README file displayed on your profile              |
-| `stars`   | Enables stars background effect (`true`)                    |
-| `colors`  | Enables avatar-based color theme (uses `node-vibrant`)      |
-| `badges`  | Enables or disables fetching of badges per user             |
+| Variable  | Description                                                        |
+|-----------|--------------------------------------------------------------------|
+| `snow`    | Enables snow background (`true` / `false`)                         |
+| `rain`    | Enables rain background (`true` / `false`)                         |
+| `stars`   | Enables starfield background (`true` / `false`)                    |
+| `badges`  | Enables badge fetching (`true` / `false`)                          |
+| `readme`  | URL to a README displayed on the profile (`.md` or `.html`)        |
+| `colors`  | Enables avatar-based color theming (uses `node-vibrant`)           |
 
 ---
 
-### 3. Start the App
+### 3. Start the Instance
 
 ```bash
 bun run start
 ```
-
-Then open `http://localhost:8080` in your browser.
 
 ---
 
@@ -80,17 +92,7 @@ Then open `http://localhost:8080` in your browser.
 docker compose up -d --build
 ```
 
-Make sure your `.env` file is correctly configured before starting.
-
----
-
-## Tech Stack
-
-- Bun – Runtime
-- EJS – Templating
-- CSS – Styling
-- node-vibrant – Avatar color extraction
-- Biome.js – Linting and formatting
+Make sure the `.env` file is configured correctly before starting the container.
 
 ---
 
