@@ -1,10 +1,5 @@
 import { redisTtl, steamGridDbKey } from "@config/environment";
-import { logger } from "@helpers/logger";
 import { redis } from "bun";
-
-if (!steamGridDbKey) {
-	logger.warn("[SteamGridDB] Route disabled: Missing API key");
-}
 
 const routeDef: RouteDef = {
 	method: "GET",

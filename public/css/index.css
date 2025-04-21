@@ -52,6 +52,26 @@ body {
 	align-items: center;
 }
 
+.open-source-logo {
+	width: 2rem;
+	height: 2rem;
+	margin: 0;
+	padding: 0;
+	cursor: pointer;
+
+	position: fixed;
+	bottom: 1rem;
+	right: .5rem;
+	z-index: 1000;
+
+	opacity: 0.5;
+	transition: opacity 0.3s ease;
+}
+
+.open-source-logo:hover {
+	opacity: 1;
+}
+
 .hidden {
 	display: none !important;
 }
@@ -493,6 +513,7 @@ ul {
 		border: none;
 		background-color: transparent;
 		margin-top: 0;
+		box-shadow: none;
 	}
 
 	.avatar-status-wrapper {
