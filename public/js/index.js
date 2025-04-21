@@ -435,8 +435,6 @@ async function getAllNoAsset() {
 		"img.activity-image.no-asset",
 	);
 
-	console.log("Images with .no-asset:", noAssetImages.length, noAssetImages);
-
 	for (const img of noAssetImages) {
 		const name = img.dataset.name;
 		if (!name) continue;
