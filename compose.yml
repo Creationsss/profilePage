@@ -1,0 +1,29 @@
+services:
+  profile-page:
+    container_name: profilePage
+    build:
+      context: .
+    restart: unless-stopped
+    ports:
+      - "${PORT:-6600}:${PORT:-6600}"
+    env_file:
+      - .env
+    networks:
+      - profilePage-network
+
+  dragonfly:
+    image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
+    restart: unless-stopped
+    ulimits:
+      memlock: -1
+    volumes:
+      - dragonflydata:/data
+    networks:
+      - profilePage-network
+
+volumes:
+  dragonflydata:
+
+networks:
+  profilePage-network:
+    driver: bridge
