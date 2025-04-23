@@ -30,6 +30,8 @@
 	<% } %>
 
 	<meta name="color-scheme" content="dark">
+
+	<link rel="icon" href="<%= avatar %>" type="image/png">
 </head>
 
 <body>
@@ -41,7 +43,7 @@
 	<div class="user-card">
 		<div class="avatar-status-wrapper">
 			<div class="avatar-wrapper">
-				<img class="avatar" src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>" alt="Avatar">
+				<img class="avatar" src="<%= avatar %>" alt="Avatar">
 				<% if (user.avatar_decoration_data) { %>
 				<img class="decoration" src="https://cdn.discordapp.com/avatar-decoration-presets/<%= user.avatar_decoration_data.asset %>" alt="Decoration">
 				<% } %>

@@ -1,4 +1,4 @@
-import { logger } from "@helpers/logger";
+import { logger } from "@creations.works/logger";
 
 import { serverHandler } from "@/server";
 

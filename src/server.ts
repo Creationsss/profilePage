@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
 import { environment } from "@config/environment";
-import { logger } from "@helpers/logger";
+import { logger } from "@creations.works/logger";
 import {
 	type BunFile,
 	FileSystemRouter,
@@ -44,7 +44,9 @@ class ServerHandler {
 		];
 
 		logger.info(`Server running at ${accessUrls[0]}`);
-		logger.info(`Access via: ${accessUrls[1]} or ${accessUrls[2]}`, true);
+		logger.info(`Access via: ${accessUrls[1]} or ${accessUrls[2]}`, {
+			breakLine: true,
+		});
 
 		this.logRoutes();
 	}

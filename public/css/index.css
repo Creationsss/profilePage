@@ -222,8 +222,8 @@ body {
 }
 
 .clan-badge {
-	width: 50px;
-	height: 20px;
+	width: fit-content;
+	height: fit-content;
 	border-radius: 8px;
 	background-color: var(--card-bg);
 
@@ -232,7 +232,7 @@ body {
 	align-items: center;
 	justify-content: center;
 	gap: 0.3rem;
-	padding: .4rem 0.5rem;
+	padding: .3rem .5rem;
 
 	text-align: center;
 	align-items: center;

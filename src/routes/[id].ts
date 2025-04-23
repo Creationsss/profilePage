@@ -41,11 +41,12 @@ async function handler(request: ExtendedRequest): Promise<Response> {
 		status = presence.discord_status;
 	}
 
+	const avatar: string = presence.discord_user.avatar
+		? `https://cdn.discordapp.com/avatars/${presence.discord_user.id}/${presence.discord_user.avatar}`
+		: `https://cdn.discordapp.com/embed/avatars/${Math.floor(Math.random() * 5)}.png`;
+
 	let colors: ImageColorResult | null = null;
 	if (presence.kv.colors === "true") {
-		const avatar: string = presence.discord_user.avatar
-			? `https://cdn.discordapp.com/avatars/${presence.discord_user.id}/${presence.discord_user.avatar}`
-			: `https://cdn.discordapp.com/embed/avatars/${presence.discord_user.discriminator || 1 % 5}`;
 		colors = await getImageColors(avatar, true);
 	}
 
@@ -64,6 +65,7 @@ async function handler(request: ExtendedRequest): Promise<Response> {
 		instance: instance,
 		readme: readme,
 		badgeApi: presence.kv.badges !== "false" ? badgeApi : null,
+		avatar: avatar,
 		colors: colors?.colors ?? {},
 		extraOptions: {
 			snow: presence.kv.snow === "true",
