@@ -1,4 +1,11 @@
+const head = document.querySelector("head");
+const userId = head?.dataset.userId;
 const activityProgressMap = new Map();
+
+let instanceUri = head?.dataset.instanceUri;
+let badgeURL = head?.dataset.badgeUrl;
+let socket;
+let badgesLoaded = false;
 
 function formatTime(ms) {
 	const totalSecs = Math.floor(ms / 1000);
@@ -78,57 +85,14 @@ function updateElapsedAndProgress() {
 	}
 }
 
-updateElapsedAndProgress();
-setInterval(updateElapsedAndProgress, 1000);
+function loadEffectScript(effect) {
+	const existing = document.querySelector(`script[data-effect="${effect}"]`);
+	if (existing) return;
 
-const head = document.querySelector("head");
-const userId = head?.dataset.userId;
-let instanceUri = head?.dataset.instanceUri;
-let badgeURL = head?.dataset.badgeUrl;
-
-if (userId && instanceUri) {
-	if (!instanceUri.startsWith("http")) {
-		instanceUri = `https://${instanceUri}`;
-	}
-
-	const wsUri = instanceUri
-		.replace(/^http:/, "ws:")
-		.replace(/^https:/, "wss:")
-		.replace(/\/$/, "");
-
-	const socket = new WebSocket(`${wsUri}/socket`);
-
-	let heartbeatInterval = null;
-
-	socket.addEventListener("open", () => {});
-
-	socket.addEventListener("message", (event) => {
-		const payload = JSON.parse(event.data);
-
-		if (payload.op === 1 && payload.d?.heartbeat_interval) {
-			heartbeatInterval = setInterval(() => {
-				socket.send(JSON.stringify({ op: 3 }));
-			}, payload.d.heartbeat_interval);
-
-			socket.send(
-				JSON.stringify({
-					op: 2,
-					d: {
-						subscribe_to_id: userId,
-					},
-				}),
-			);
-		}
-
-		if (payload.t === "INIT_STATE" || payload.t === "PRESENCE_UPDATE") {
-			updatePresence(payload.d);
-			requestAnimationFrame(() => updateElapsedAndProgress());
-		}
-	});
-
-	socket.addEventListener("close", () => {
-		if (heartbeatInterval) clearInterval(heartbeatInterval);
-	});
+	const script = document.createElement("script");
+	script.src = `/public/js/${effect}.js`;
+	script.dataset.effect = effect;
+	document.head.appendChild(script);
 }
 
 function resolveActivityImage(img, applicationId) {
@@ -280,95 +244,76 @@ function buildActivityHTML(activity) {
 	`;
 }
 
-if (badgeURL && badgeURL !== "null" && userId) {
-	if (!badgeURL.startsWith("http")) {
-		badgeURL = `https://${badgeURL}`;
-	}
+async function loadBadges(userId, options = {}) {
+	const {
+		services = [],
+		seperated = false,
+		cache = true,
+		targetId = "badges",
+		serviceOrder = [],
+	} = options;
 
-	if (!badgeURL.endsWith("/")) {
-		badgeURL += "/";
-	}
+	const params = new URLSearchParams();
+	if (services.length) params.set("services", services.join(","));
+	if (seperated) params.set("seperated", "true");
+	if (!cache) params.set("cache", "false");
 
-	async function loadBadges(userId, options = {}) {
-		const {
-			services = [],
-			seperated = false,
-			cache = true,
-			targetId = "badges",
-			serviceOrder = [],
-		} = options;
+	const url = `${badgeURL}${userId}?${params.toString()}`;
+	const target = document.getElementById(targetId);
+	if (!target) return;
 
-		const params = new URLSearchParams();
-		if (services.length) params.set("services", services.join(","));
-		if (seperated) params.set("seperated", "true");
-		if (!cache) params.set("cache", "false");
+	target.classList.add("hidden");
 
-		const url = `${badgeURL}${userId}?${params.toString()}`;
-		const target = document.getElementById(targetId);
-		if (!target) return;
+	try {
+		const res = await fetch(url);
+		const json = await res.json();
 
-		target.classList.add("hidden");
-
-		try {
-			const res = await fetch(url);
-			const json = await res.json();
-
-			if (!res.ok || !json.badges) {
-				target.textContent = "Failed to load badges.";
-				return;
-			}
-
-			target.innerHTML = "";
-
-			const badgesByService = json.badges;
-			const renderedServices = new Set();
-
-			const renderBadges = (badges) => {
-				for (const badge of badges) {
-					const img = document.createElement("img");
-					img.src = badge.badge;
-					img.alt = badge.tooltip;
-					img.title = badge.tooltip;
-					img.className = "badge";
-					target.appendChild(img);
-				}
-			};
-
-			for (const serviceName of serviceOrder) {
-				const badges = badgesByService[serviceName];
-				if (Array.isArray(badges) && badges.length) {
-					renderBadges(badges);
-					renderedServices.add(serviceName);
-				}
-			}
-
-			for (const [serviceName, badges] of Object.entries(badgesByService)) {
-				if (renderedServices.has(serviceName)) continue;
-				if (Array.isArray(badges) && badges.length) {
-					renderBadges(badges);
-				}
-			}
-
-			target.classList.remove("hidden");
-		} catch (err) {
-			console.error(err);
-			target.innerHTML = "";
-			target.classList.add("hidden");
+		if (!res.ok || !json.badges) {
+			target.textContent = "Failed to load badges.";
+			return;
 		}
-	}
 
-	loadBadges(userId, {
-		services: [],
-		seperated: true,
-		cache: true,
-		targetId: "badges",
-		serviceOrder: ["discord", "equicord", "reviewdb", "vencord"],
-	});
+		target.innerHTML = "";
+
+		const badgesByService = json.badges;
+		const renderedServices = new Set();
+
+		const renderBadges = (badges) => {
+			for (const badge of badges) {
+				const img = document.createElement("img");
+				img.src = badge.badge;
+				img.alt = badge.tooltip;
+				img.title = badge.tooltip;
+				img.className = "badge";
+				target.appendChild(img);
+			}
+		};
+
+		for (const serviceName of serviceOrder) {
+			const badges = badgesByService[serviceName];
+			if (Array.isArray(badges) && badges.length) {
+				renderBadges(badges);
+				renderedServices.add(serviceName);
+			}
+		}
+
+		for (const [serviceName, badges] of Object.entries(badgesByService)) {
+			if (renderedServices.has(serviceName)) continue;
+			if (Array.isArray(badges) && badges.length) {
+				renderBadges(badges);
+			}
+		}
+
+		target.classList.remove("hidden");
+	} catch (err) {
+		console.error(err);
+		target.innerHTML = "";
+		target.classList.add("hidden");
+	}
 }
 
 async function updatePresence(data) {
 	const cssLink = data.kv?.css;
-
 	if (cssLink) {
 		try {
 			const res = await fetch(`/api/css?url=${encodeURIComponent(cssLink)}`);
@@ -384,9 +329,36 @@ async function updatePresence(data) {
 	}
 
 	const avatarWrapper = document.querySelector(".avatar-wrapper");
-
-	const avatarImg = document.querySelector(".avatar-wrapper .avatar");
+	const avatarImg = avatarWrapper?.querySelector(".avatar");
 	const usernameEl = document.querySelector(".username");
+
+	if (!data.discord_user) {
+		const loadingOverlay = document.getElementById("loading-overlay");
+		if (loadingOverlay) {
+			loadingOverlay.innerHTML = `
+				<div class="error-message">
+					<p>Failed to load user data.</p>
+				</div>
+			`;
+			loadingOverlay.style.opacity = "1";
+			avatarWrapper.classList.add("hidden");
+			avatarImg.classList.add("hidden");
+			usernameEl.classList.add("hidden");
+			document.title = "Error";
+		}
+		return;
+	}
+
+	if (!badgesLoaded) {
+		loadBadges(userId, {
+			services: [],
+			seperated: true,
+			cache: true,
+			targetId: "badges",
+			serviceOrder: ["discord", "equicord", "reviewdb", "vencord"],
+		});
+		badgesLoaded = true;
+	}
 
 	if (avatarImg && data.discord_user?.avatar) {
 		const newAvatarUrl = `https://cdn.discordapp.com/avatars/${data.discord_user.id}/${data.discord_user.avatar}`;
@@ -582,12 +554,60 @@ async function getAllNoAsset() {
 	}
 }
 
-function loadEffectScript(effect) {
-	const existing = document.querySelector(`script[data-effect="${effect}"]`);
-	if (existing) return;
+if (instanceUri) {
+	if (!instanceUri.startsWith("http")) {
+		instanceUri = `https://${instanceUri}`;
+	}
 
-	const script = document.createElement("script");
-	script.src = `/public/js/${effect}.js`;
-	script.dataset.effect = effect;
-	document.head.appendChild(script);
+	const wsUri = instanceUri
+		.replace(/^http:/, "ws:")
+		.replace(/^https:/, "wss:")
+		.replace(/\/$/, "");
+
+	socket = new WebSocket(`${wsUri}/socket`);
 }
+
+if (badgeURL && badgeURL !== "null" && userId) {
+	if (!badgeURL.startsWith("http")) {
+		badgeURL = `https://${badgeURL}`;
+	}
+
+	if (!badgeURL.endsWith("/")) {
+		badgeURL += "/";
+	}
+}
+
+if (userId && instanceUri) {
+	let heartbeatInterval = null;
+
+	socket.addEventListener("message", (event) => {
+		const payload = JSON.parse(event.data);
+
+		if (payload.op === 1 && payload.d?.heartbeat_interval) {
+			heartbeatInterval = setInterval(() => {
+				socket.send(JSON.stringify({ op: 3 }));
+			}, payload.d.heartbeat_interval);
+
+			socket.send(
+				JSON.stringify({
+					op: 2,
+					d: {
+						subscribe_to_id: userId,
+					},
+				}),
+			);
+		}
+
+		if (payload.t === "INIT_STATE" || payload.t === "PRESENCE_UPDATE") {
+			updatePresence(payload.d);
+			requestAnimationFrame(() => updateElapsedAndProgress());
+		}
+	});
+
+	socket.addEventListener("close", () => {
+		if (heartbeatInterval) clearInterval(heartbeatInterval);
+	});
+}
+
+updateElapsedAndProgress();
+setInterval(updateElapsedAndProgress, 1000);
