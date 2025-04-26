@@ -419,25 +419,43 @@ async function updatePresence(data) {
 		status = data.discord_status;
 	}
 
-	let updatedStatusIndicator = avatarWrapper.querySelector(".status-indicator");
-	const updatedMobileIcon = avatarWrapper.querySelector(
-		".platform-icon.mobile-only",
-	);
+	for (const el of avatarWrapper.querySelectorAll(".platform-icon")) {
+		const platformType = ["mobile-only", "desktop-only", "web-only"].find(type => el.classList.contains(type));
 
-	if (platform.mobile && !updatedMobileIcon) {
-		avatarWrapper.innerHTML += `
-			<svg class="platform-icon mobile-only ${status}" viewBox="0 0 1000 1500" fill="#43a25a" aria-label="Mobile" width="17" height="17">
-				<path d="M 187 0 L 813 0 C 916.277 0 1000 83.723 1000 187 L 1000 1313 C 1000 1416.277 916.277 1500 813 1500 L 187 1500 C 83.723 1500 0 1416.277 0 1313 L 0 187 C 0 83.723 83.723 0 187 0 Z M 125 1000 L 875 1000 L 875 250 L 125 250 Z M 500 1125 C 430.964 1125 375 1180.964 375 1250 C 375 1319.036 430.964 1375 500 1375 C 569.036 1375 625 1319.036 625 1250 C 625 1180.964 569.036 1125 500 1125 Z"/>
-			</svg>
-		`;
-	} else if (!platform.mobile && updatedMobileIcon) {
-		updatedMobileIcon.remove();
-		avatarWrapper.innerHTML += `<div class="status-indicator ${status}"></div>`;
+		if (!platformType) continue;
+
+		const active =
+			(platformType === "mobile-only" && platform.mobile) ||
+			(platformType === "desktop-only" && platform.desktop) ||
+			(platformType === "web-only" && platform.web);
+
+		if (!active) {
+			el.remove();
+		} else {
+			el.setAttribute("class", `platform-icon ${platformType} ${status}`);
+		}
 	}
 
-	updatedStatusIndicator = avatarWrapper.querySelector(".status-indicator");
+	if (platform.mobile && !avatarWrapper.querySelector(".platform-icon.mobile-only")) {
+		const mobileIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+		mobileIcon.setAttribute("class", `platform-icon mobile-only ${status}`);
+		mobileIcon.setAttribute("viewBox", "0 0 1000 1500");
+		mobileIcon.setAttribute("fill", "#43a25a");
+		mobileIcon.setAttribute("aria-label", "Mobile");
+		mobileIcon.setAttribute("width", "17");
+		mobileIcon.setAttribute("height", "17");
+		mobileIcon.innerHTML = `
+			<path d="M 187 0 L 813 0 C 916.277 0 1000 83.723 1000 187 L 1000 1313 C 1000 1416.277 916.277 1500 813 1500 L 187 1500 C 83.723 1500 0 1416.277 0 1313 L 0 187 C 0 83.723 83.723 0 187 0 Z M 125 1000 L 875 1000 L 875 250 L 125 250 Z M 500 1125 C 430.964 1125 375 1180.964 375 1250 C 375 1319.036 430.964 1375 500 1375 C 569.036 1375 625 1319.036 625 1250 C 625 1180.964 569.036 1125 500 1125 Z"/>
+		`;
+		avatarWrapper.appendChild(mobileIcon);
+	}
 
-	if (updatedStatusIndicator) {
+	const updatedStatusIndicator = avatarWrapper.querySelector(".status-indicator");
+	if (!updatedStatusIndicator) {
+		const statusDiv = document.createElement("div");
+		statusDiv.className = `status-indicator ${status}`;
+		avatarWrapper.appendChild(statusDiv);
+	} else {
 		updatedStatusIndicator.className = `status-indicator ${status}`;
 	}
 
