@@ -49,10 +49,7 @@ async function fetchAndCacheReadme(url: string): Promise<string | null> {
 	if (!res.ok) return null;
 
 	if (res.headers.has("content-length")) {
-		const size = Number.parseInt(
-			res.headers.get("content-length") || "0",
-			10,
-		);
+		const size = Number.parseInt(res.headers.get("content-length") || "0", 10);
 		if (size > 1024 * 100) return null;
 	}
 
@@ -107,8 +104,7 @@ async function handler(request: ExtendedRequest): Promise<Response> {
 	return new Response(safe, {
 		headers: {
 			"Content-Type": "text/html; charset=utf-8",
-			"Cache-Control":
-				"no-store, no-cache, must-revalidate, proxy-revalidate",
+			"Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
 			Pragma: "no-cache",
 			Expires: "0",
 		},
