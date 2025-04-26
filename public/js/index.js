@@ -171,7 +171,10 @@ function buildActivityHTML(activity) {
 			? `<div class="activity-buttons">
 					${activity.buttons
 						.map((button, index) => {
-							const label = typeof button === "string" ? button : button.label;
+							const label =
+								typeof button === "string"
+									? button
+									: button.label;
 							let url = null;
 							if (typeof button === "object" && button.url) {
 								url = button.url;
@@ -318,7 +321,9 @@ async function populateReadme(data) {
 	if (readmeSection && data.kv?.readme) {
 		const url = data.kv.readme;
 		try {
-			const res = await fetch(`/api/readme?url=${encodeURIComponent(url)}`);
+			const res = await fetch(
+				`/api/readme?url=${encodeURIComponent(url)}`,
+			);
 			if (!res.ok) throw new Error("Failed to fetch readme");
 
 			const text = await res.text();
@@ -338,7 +343,9 @@ async function updatePresence(data) {
 	const cssLink = data.kv?.css;
 	if (cssLink) {
 		try {
-			const res = await fetch(`/api/css?url=${encodeURIComponent(cssLink)}`);
+			const res = await fetch(
+				`/api/css?url=${encodeURIComponent(cssLink)}`,
+			);
 			if (!res.ok) throw new Error("Failed to fetch CSS");
 
 			const cssText = await res.text();
@@ -452,7 +459,7 @@ async function updatePresence(data) {
 		updatedStatusIndicator.className = `status-indicator ${status}`;
 	}
 
-	if (!badgesLoaded) {
+	if (!badgesLoaded && data && data.kv.badges !== "false") {
 		loadBadges(userId, {
 			services: [],
 			seperated: true,
