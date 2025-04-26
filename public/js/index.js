@@ -312,6 +312,28 @@ async function loadBadges(userId, options = {}) {
 	}
 }
 
+async function populateReadme(data) {
+	const readmeSection = document.querySelector(".readme");
+
+	if (readmeSection && data.kv?.readme) {
+		const url = data.kv.readme;
+		try {
+			const res = await fetch(`/api/readme?url=${encodeURIComponent(url)}`);
+			if (!res.ok) throw new Error("Failed to fetch readme");
+
+			const text = await res.text();
+
+			readmeSection.innerHTML = `<div class="markdown-body">${text}</div>`;
+			readmeSection.classList.remove("hidden");
+		} catch (err) {
+			console.error("Failed to load README", err);
+			readmeSection.classList.add("hidden");
+		}
+	} else if (readmeSection) {
+		readmeSection.classList.add("hidden");
+	}
+}
+
 async function updatePresence(data) {
 	const cssLink = data.kv?.css;
 	if (cssLink) {
@@ -431,7 +453,7 @@ async function updatePresence(data) {
 	}
 
 	if (!badgesLoaded) {
-		await loadBadges(userId, {
+		loadBadges(userId, {
 			services: [],
 			seperated: true,
 			cache: true,
@@ -444,25 +466,7 @@ async function updatePresence(data) {
 	const custom = data.activities?.find((a) => a.type === 4);
 	updateCustomStatus(custom);
 
-	const readmeSection = document.querySelector(".readme");
-
-	if (readmeSection && data.kv?.readme) {
-		const url = data.kv.readme;
-		try {
-			const res = await fetch(`/api/readme?url=${encodeURIComponent(url)}`);
-			if (!res.ok) throw new Error("Failed to fetch readme");
-
-			const text = await res.text();
-
-			readmeSection.innerHTML = `<div class="markdown-body">${text}</div>`;
-			readmeSection.classList.remove("hidden");
-		} catch (err) {
-			console.error("Failed to load README", err);
-			readmeSection.classList.add("hidden");
-		}
-	} else if (readmeSection) {
-		readmeSection.classList.add("hidden");
-	}
+	populateReadme(data);
 
 	const filtered = data.activities
 		?.filter((a) => a.type !== 4)

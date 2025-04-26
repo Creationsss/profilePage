@@ -1,4 +1,6 @@
+import { redisTtl } from "@config/environment";
 import { fetch } from "bun";
+import { redis } from "bun";
 
 const routeDef: RouteDef = {
 	method: "GET",
@@ -6,6 +8,37 @@ const routeDef: RouteDef = {
 	returns: "*/*",
 	log: false,
 };
+
+async function fetchAndCacheCss(url: string): Promise<string | null> {
+	const cacheKey = `css:${url}`;
+	const cached = await redis.get(cacheKey);
+	if (cached) return cached;
+
+	const res = await fetch(url, {
+		headers: {
+			Accept: "text/css",
+		},
+	});
+
+	if (!res.ok) return null;
+
+	if (res.headers.has("content-length")) {
+		const size = Number.parseInt(res.headers.get("content-length") || "0", 10);
+		if (size > 1024 * 50) return null;
+	}
+
+	const text = await res.text();
+	if (!text || text.length < 5) return null;
+
+	const sanitized = text
+		.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "")
+		.replace(/@import\s+url\(['"]?(.*?)['"]?\);?/gi, "");
+
+	await redis.set(cacheKey, sanitized);
+	await redis.expire(cacheKey, redisTtl);
+
+	return sanitized;
+}
 
 async function handler(request: ExtendedRequest): Promise<Response> {
 	const { url } = request.query;
@@ -23,58 +56,20 @@ async function handler(request: ExtendedRequest): Promise<Response> {
 		);
 	}
 
-	const res = await fetch(url, {
-		headers: {
-			Accept: "text/css",
-		},
-	});
+	const sanitized = await fetchAndCacheCss(url);
 
-	if (!res.ok) {
+	if (!sanitized) {
 		return Response.json(
 			{
 				success: false,
 				error: {
 					code: "FETCH_FAILED",
-					message: "Failed to fetch CSS file",
+					message: "Failed to fetch or sanitize CSS",
 				},
 			},
 			{ status: 400 },
 		);
 	}
-
-	if (res.headers.has("content-length")) {
-		const size = Number.parseInt(res.headers.get("content-length") || "0", 10);
-		if (size > 1024 * 50) {
-			return Response.json(
-				{
-					success: false,
-					error: {
-						code: "FILE_TOO_LARGE",
-						message: "CSS file exceeds 50KB limit",
-					},
-				},
-				{ status: 400 },
-			);
-		}
-	}
-
-	const text = await res.text();
-	if (!text || text.length < 5) {
-		return Response.json(
-			{
-				success: false,
-				error: {
-					code: "INVALID_CONTENT",
-					message: "CSS content is too small or invalid",
-				},
-			},
-			{ status: 400 },
-		);
-	}
-
-	const sanitized = text
-		.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "")
-		.replace(/@import\s+url\(['"]?(.*?)['"]?\);?/gi, "");
 
 	return new Response(sanitized, {
 		headers: {

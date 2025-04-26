@@ -5,6 +5,7 @@ const routeDef: RouteDef = {
 	method: "GET",
 	accepts: "*/*",
 	returns: "application/json",
+	log: false,
 };
 
 async function fetchSteamGridIcon(gameName: string): Promise<string | null> {
@@ -53,7 +54,10 @@ async function fetchSteamGridIcon(gameName: string): Promise<string | null> {
 async function handler(request: ExtendedRequest): Promise<Response> {
 	if (!steamGridDbKey) {
 		return Response.json(
-			{ status: 503, error: "Route disabled due to missing SteamGridDB key" },
+			{
+				status: 503,
+				error: "Route disabled due to missing SteamGridDB key",
+			},
 			{ status: 503 },
 		);
 	}
