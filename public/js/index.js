@@ -295,6 +295,7 @@ if (badgeURL && badgeURL !== "null" && userId) {
 			seperated = false,
 			cache = true,
 			targetId = "badges",
+			serviceOrder = [],
 		} = options;
 
 		const params = new URLSearchParams();
@@ -317,24 +318,35 @@ if (badgeURL && badgeURL !== "null" && userId) {
 				return;
 			}
 
-			const badges = Array.isArray(json.badges)
-				? json.badges
-				: Object.values(json.badges).flat();
+			target.innerHTML = "";
 
-			if (badges.length === 0) {
-				target.innerHTML = "";
-				target.classList.add("hidden");
-				return;
+			const badgesByService = json.badges;
+			const renderedServices = new Set();
+
+			const renderBadges = (badges) => {
+				for (const badge of badges) {
+					const img = document.createElement("img");
+					img.src = badge.badge;
+					img.alt = badge.tooltip;
+					img.title = badge.tooltip;
+					img.className = "badge";
+					target.appendChild(img);
+				}
+			};
+
+			for (const serviceName of serviceOrder) {
+				const badges = badgesByService[serviceName];
+				if (Array.isArray(badges) && badges.length) {
+					renderBadges(badges);
+					renderedServices.add(serviceName);
+				}
 			}
 
-			target.innerHTML = "";
-			for (const badge of badges) {
-				const img = document.createElement("img");
-				img.src = badge.badge;
-				img.alt = badge.tooltip;
-				img.title = badge.tooltip;
-				img.className = "badge";
-				target.appendChild(img);
+			for (const [serviceName, badges] of Object.entries(badgesByService)) {
+				if (renderedServices.has(serviceName)) continue;
+				if (Array.isArray(badges) && badges.length) {
+					renderBadges(badges);
+				}
 			}
 
 			target.classList.remove("hidden");
@@ -347,9 +359,10 @@ if (badgeURL && badgeURL !== "null" && userId) {
 
 	loadBadges(userId, {
 		services: [],
-		seperated: false,
+		seperated: true,
 		cache: true,
 		targetId: "badges",
+		serviceOrder: ["discord", "equicord", "reviewdb", "vencord"],
 	});
 }
 
@@ -428,6 +441,9 @@ async function updatePresence(data) {
 		updatedStatusIndicator.className = `status-indicator ${status}`;
 	}
 
+	const custom = data.activities?.find((a) => a.type === 4);
+	updateCustomStatus(custom);
+
 	const readmeSection = document.querySelector(".readme");
 
 	if (readmeSection && data.kv?.readme) {
@@ -447,9 +463,6 @@ async function updatePresence(data) {
 	} else if (readmeSection) {
 		readmeSection.classList.add("hidden");
 	}
-
-	const custom = data.activities?.find((a) => a.type === 4);
-	updateCustomStatus(custom);
 
 	const filtered = data.activities
 		?.filter((a) => a.type !== 4)
