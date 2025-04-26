@@ -94,7 +94,7 @@ body {
 
 	position: fixed;
 	bottom: 1rem;
-	right: .5rem;
+	right: 0.5rem;
 	z-index: 1000;
 
 	opacity: 0.5;
@@ -246,7 +246,7 @@ body {
 	flex-direction: row;
 	align-items: center;
 	text-align: center;
-	gap: .5rem;
+	gap: 0.5rem;
 }
 
 .user-info-inner h1 {
@@ -265,7 +265,7 @@ body {
 	align-items: center;
 	justify-content: center;
 	gap: 0.3rem;
-	padding: .3rem .5rem;
+	padding: 0.3rem 0.5rem;
 
 	text-align: center;
 	align-items: center;
@@ -280,7 +280,7 @@ body {
 }
 
 .clan-badge span {
-	font-size: .9rem;
+	font-size: 0.9rem;
 	color: var(--text-color);
 	margin: 0;
 
@@ -480,7 +480,7 @@ ul {
 	text-transform: uppercase;
 	font-weight: 600;
 	color: var(--blockquote-color);
-	margin-bottom: 0.50rem;
+	margin-bottom: 0.5rem;
 	display: block;
 }
 
@@ -538,6 +538,7 @@ ul {
 	.user-card {
 		width: 100%;
 		align-items: center;
+		margin-top: 2rem;
 	}
 
 	.badges {
