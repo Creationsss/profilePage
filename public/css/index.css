@@ -351,10 +351,10 @@ ul {
 	border: 1px solid var(--border-color);
 
 	transition: background-color 0.3s ease;
-}
 
-.activity:hover {
-	background: var(--card-hover-bg);
+	&:hover{
+		background: var(--card-hover-bg);
+	}
 }
 
 .activity-wrapper {
@@ -517,17 +517,17 @@ ul {
 	text-decoration: none;
 	transition: background-color 0.2s ease;
 	display: inline-block;
-}
 
-.activity-button:hover {
-	background-color: var(--button-hover-bg);
-	text-decoration: none;
-}
+	&:hover{
+		background-color: var(--button-hover-bg);
+		text-decoration: none;
+	}
 
-.activity-button:disabled {
-	background-color: var(--button-disabled-bg);
-	cursor: not-allowed;
-	opacity: 0.8;
+	&:disabled{
+		background-color: var(--button-disabled-bg);
+		cursor: not-allowed;
+		opacity: 0.8;
+	}
 }
 
 @media (max-width: 600px) {
