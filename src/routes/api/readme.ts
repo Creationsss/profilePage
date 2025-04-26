@@ -1,6 +1,5 @@
 import { redisTtl } from "@config/environment";
-import { fetch } from "bun";
-import { redis } from "bun";
+import { fetch, redis } from "bun";
 import { marked } from "marked";
 
 const routeDef: RouteDef = {
@@ -22,9 +21,34 @@ async function addLazyLoading(html: string): Promise<string> {
 
 async function sanitizeHtml(html: string): Promise<string> {
 	return new HTMLRewriter()
-		.on("script, iframe, object, embed, link[rel=import]", {
+		.on(
+			"script, iframe, object, embed, link[rel=import], svg, math, base, meta[http-equiv='refresh']",
+			{
+				element(el) {
+					el.remove();
+				},
+			},
+		)
+		.on("*", {
 			element(el) {
-				el.remove();
+				for (const [name, value] of el.attributes) {
+					const lowerName = name.toLowerCase();
+					const lowerValue = value.toLowerCase();
+
+					if (lowerName.startsWith("on")) {
+						el.removeAttribute(name);
+					}
+
+					if (
+						(lowerName === "href" ||
+							lowerName === "src" ||
+							lowerName === "action") &&
+						(lowerValue.startsWith("javascript:") ||
+							lowerValue.startsWith("data:"))
+					) {
+						el.removeAttribute(name);
+					}
+				}
 			},
 		})
 		.on("img", {
