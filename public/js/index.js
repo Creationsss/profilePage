@@ -390,6 +390,8 @@ async function updatePresence(data) {
 		document.title = username;
 	}
 
+	updateClanBadge(data);
+
 	const platform = {
 		mobile: data.active_on_discord_mobile,
 		web: data.active_on_discord_web,
@@ -556,6 +558,38 @@ async function getAllNoAsset() {
 		} catch (err) {
 			console.warn(`Failed to fetch fallback icon for "${name}"`, err);
 		}
+	}
+}
+
+function updateClanBadge(data) {
+	const userInfoInner = document.querySelector(".user-info-inner");
+	if (!userInfoInner) return;
+
+	const clan = data?.discord_user?.clan;
+	if (!clan || !clan.tag || !clan.identity_guild_id || !clan.badge) return;
+
+	const existing = userInfoInner.querySelector(".clan-badge");
+	if (existing) existing.remove();
+
+	const wrapper = document.createElement("div");
+	wrapper.className = "clan-badge";
+
+	const img = document.createElement("img");
+	img.src = `https://cdn.discordapp.com/clan-badges/${clan.identity_guild_id}/${clan.badge}`;
+	img.alt = "Clan Badge";
+
+	const span = document.createElement("span");
+	span.className = "clan-name";
+	span.textContent = clan.tag;
+
+	wrapper.appendChild(img);
+	wrapper.appendChild(span);
+
+	const usernameEl = userInfoInner.querySelector(".username");
+	if (usernameEl) {
+		usernameEl.insertAdjacentElement("afterend", wrapper);
+	} else {
+		userInfoInner.appendChild(wrapper);
 	}
 }
 

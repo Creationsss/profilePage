@@ -1,52 +1,59 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Discord Presence</title>
 
-	<title>Discord Presence</title>
+		<link rel="stylesheet" href="/public/css/index.css" />
+		<link rel="stylesheet" href="/public/css/root.css" />
 
-	<link rel="stylesheet" href="/public/css/index.css">
-	<link rel="stylesheet" href="/public/css/root.css">
+		<meta name="color-scheme" content="dark" />
+		<link rel="icon" id="site-icon" type="image/png" />
+	</head>
 
-	<meta name="color-scheme" content="dark">
-	<link rel="icon" id="site-icon" type="image/png">
-</head>
+	<body>
+		<div id="loading-overlay">
+			<div class="loading-spinner"></div>
+		</div>
 
-<body>
-	<div id="loading-overlay">
-		<div class="loading-spinner"></div>
-	</div>
+		<a
+			href="https://git.creations.works/creations/profilePage"
+			target="_blank"
+			rel="noopener noreferrer"
+		>
+			<img
+				class="open-source-logo"
+				src="/public/assets/forgejo_logo.svg"
+				alt="Forgejo Logo"
+				style="opacity: 0.5"
+			/>
+		</a>
 
-	<a href="https://git.creations.works/creations/profilePage" target="_blank" rel="noopener noreferrer">
-		<img class="open-source-logo" src="/public/assets/forgejo_logo.svg" alt="Forgejo Logo" style="opacity: 0.5;">
-	</a>
-
-	<div class="user-card">
-		<div class="avatar-status-wrapper">
-			<div class="avatar-wrapper">
-				<img class="avatar hidden" src="">
-				<div class="status-indicator offline hidden"></div>
-			</div>
-			<div class="user-info">
-				<div class="user-info-inner">
-					<h1 class="username"></h1>
+		<div class="user-card">
+			<div class="avatar-status-wrapper">
+				<div class="avatar-wrapper">
+					<img class="avatar hidden" src="" />
+					<div class="status-indicator offline hidden"></div>
+				</div>
+				<div class="user-info">
+					<div class="user-info-inner">
+						<h1 class="username"></h1>
+					</div>
 				</div>
 			</div>
 		</div>
-	</div>
 
-	<div id="badges" class="badges hidden"></div>
+		<div id="badges" class="badges hidden"></div>
 
-	<h2 class="activity-header hidden">Activities</h2>
-	<ul class="activities"></ul>
+		<h2 class="activity-header hidden">Activities</h2>
+		<ul class="activities"></ul>
 
-	<section class="readme hidden">
-		<div class="markdown-body"></div>
-	</section>
+		<section class="readme hidden">
+			<div class="markdown-body"></div>
+		</section>
 
-	<script src="/public/js/index.js"></script>
-</body>
-
+		<script src="/public/js/index.js"></script>
+	</body>
 </html>
