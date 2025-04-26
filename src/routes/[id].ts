@@ -1,5 +1,6 @@
+import { resolve } from "node:path";
 import { badgeApi, lanyardConfig } from "@config/environment";
-import { renderEjsTemplate } from "@helpers/ejs";
+import { file } from "bun";
 
 const routeDef: RouteDef = {
 	method: "GET",
@@ -13,17 +14,24 @@ async function handler(request: ExtendedRequest): Promise<Response> {
 		.replace(/^https?:\/\//, "")
 		.replace(/\/$/, "");
 
-	const ejsTemplateData: EjsTemplateData = {
-		title: "Discord Profile",
-		username: "",
-		user: { id: id || lanyardConfig.userId },
-		instance: instance,
-		badgeApi: badgeApi,
-		avatar: `https://cdn.discordapp.com/embed/avatars/${Math.floor(Math.random() * 5)}.png`,
-		extraOptions: {},
-	};
+	const path = resolve("src", "views", "index.html");
+	const bunFile = file(path);
 
-	return await renderEjsTemplate("index", ejsTemplateData);
+	const html = new HTMLRewriter()
+		.on("head", {
+			element(head) {
+				head.setAttribute("data-user-id", id || lanyardConfig.userId);
+				head.setAttribute("data-instance-uri", instance);
+				head.setAttribute("data-badge-url", badgeApi || "");
+			},
+		})
+		.transform(await bunFile.text());
+
+	return new Response(html, {
+		headers: {
+			"Content-Type": "text/html",
+		},
+	});
 }
 
 export { handler, routeDef };

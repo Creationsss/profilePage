@@ -1,6 +1,6 @@
 # Discord Profile Page
 
-A cool little web app that shows your Discord profile, current activity, and more. Built with Bun and EJS.
+A cool little web app that shows your Discord profile, current activity, and more. Built with Bun.
 
 ---
 

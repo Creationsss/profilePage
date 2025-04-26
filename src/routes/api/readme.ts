@@ -1,8 +1,6 @@
 import { redisTtl } from "@config/environment";
 import { fetch } from "bun";
 import { redis } from "bun";
-import DOMPurify from "isomorphic-dompurify";
-import { parseHTML } from "linkedom";
 import { marked } from "marked";
 
 const routeDef: RouteDef = {
@@ -11,6 +9,16 @@ const routeDef: RouteDef = {
 	returns: "*/*",
 	log: false,
 };
+
+async function addLazyLoading(html: string): Promise<string> {
+	return new HTMLRewriter()
+		.on("img", {
+			element(el) {
+				el.setAttribute("loading", "lazy");
+			},
+		})
+		.transform(html);
+}
 
 async function fetchAndCacheReadme(url: string): Promise<string | null> {
 	const cacheKey = `readme:${url}`;
@@ -33,22 +41,9 @@ async function fetchAndCacheReadme(url: string): Promise<string | null> {
 	const text = await res.text();
 	if (!text || text.length < 10) return null;
 
-	let html: string;
-	if (/\.(html?|htm)$/i.test(url)) {
-		html = text;
-	} else {
-		html = await marked.parse(text);
-	}
+	const html = /\.(html?|htm)$/i.test(url) ? text : await marked.parse(text);
 
-	const { document } = parseHTML(html);
-	for (const img of Array.from(document.querySelectorAll("img"))) {
-		if (!img.hasAttribute("loading")) {
-			img.setAttribute("loading", "lazy");
-		}
-	}
-
-	const dirtyHtml = document.toString();
-	const safe = DOMPurify.sanitize(dirtyHtml) || "";
+	const safe = await addLazyLoading(html);
 
 	await redis.set(cacheKey, safe);
 	await redis.expire(cacheKey, redisTtl);

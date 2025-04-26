@@ -12,7 +12,6 @@
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
 		"@types/bun": "^1.2.8",
-		"@types/ejs": "^3.1.5",
 		"globals": "^16.0.0"
 	},
 	"peerDependencies": {
@@ -20,9 +19,7 @@
 	},
 	"dependencies": {
 		"@creations.works/logger": "^1.0.3",
-		"ejs": "^3.1.10",
 		"isomorphic-dompurify": "^2.23.0",
-		"linkedom": "^0.18.9",
 		"marked": "^15.0.7"
 	}
 }
