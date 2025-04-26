@@ -420,7 +420,9 @@ async function updatePresence(data) {
 	}
 
 	for (const el of avatarWrapper.querySelectorAll(".platform-icon")) {
-		const platformType = ["mobile-only", "desktop-only", "web-only"].find(type => el.classList.contains(type));
+		const platformType = ["mobile-only", "desktop-only", "web-only"].find(
+			(type) => el.classList.contains(type),
+		);
 
 		if (!platformType) continue;
 
@@ -436,8 +438,14 @@ async function updatePresence(data) {
 		}
 	}
 
-	if (platform.mobile && !avatarWrapper.querySelector(".platform-icon.mobile-only")) {
-		const mobileIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+	if (
+		platform.mobile &&
+		!avatarWrapper.querySelector(".platform-icon.mobile-only")
+	) {
+		const mobileIcon = document.createElementNS(
+			"http://www.w3.org/2000/svg",
+			"svg",
+		);
 		mobileIcon.setAttribute("class", `platform-icon mobile-only ${status}`);
 		mobileIcon.setAttribute("viewBox", "0 0 1000 1500");
 		mobileIcon.setAttribute("fill", "#43a25a");
@@ -450,7 +458,8 @@ async function updatePresence(data) {
 		avatarWrapper.appendChild(mobileIcon);
 	}
 
-	const updatedStatusIndicator = avatarWrapper.querySelector(".status-indicator");
+	const updatedStatusIndicator =
+		avatarWrapper.querySelector(".status-indicator");
 	if (!updatedStatusIndicator) {
 		const statusDiv = document.createElement("div");
 		statusDiv.className = `status-indicator ${status}`;
