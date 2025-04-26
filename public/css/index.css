@@ -99,10 +99,10 @@ body {
 
 	opacity: 0.5;
 	transition: opacity 0.3s ease;
-}
 
-.open-source-logo:hover {
-	opacity: 1 !important;
+	&:hover {
+		opacity: 1 !important;
+	}
 }
 
 .hidden {
@@ -352,7 +352,7 @@ ul {
 
 	transition: background-color 0.3s ease;
 
-	&:hover{
+	&:hover {
 		background: var(--card-hover-bg);
 	}
 }
@@ -518,12 +518,12 @@ ul {
 	transition: background-color 0.2s ease;
 	display: inline-block;
 
-	&:hover{
+	&:hover {
 		background-color: var(--button-hover-bg);
 		text-decoration: none;
 	}
 
-	&:disabled{
+	&:disabled {
 		background-color: var(--button-disabled-bg);
 		cursor: not-allowed;
 		opacity: 0.8;
