@@ -20,6 +20,21 @@ async function addLazyLoading(html: string): Promise<string> {
 		.transform(html);
 }
 
+async function sanitizeHtml(html: string): Promise<string> {
+	return new HTMLRewriter()
+		.on("script, iframe, object, embed, link[rel=import]", {
+			element(el) {
+				el.remove();
+			},
+		})
+		.on("img", {
+			element(el) {
+				el.setAttribute("loading", "lazy");
+			},
+		})
+		.transform(html);
+}
+
 async function fetchAndCacheReadme(url: string): Promise<string | null> {
 	const cacheKey = `readme:${url}`;
 	const cached = await redis.get(cacheKey);
@@ -34,7 +49,10 @@ async function fetchAndCacheReadme(url: string): Promise<string | null> {
 	if (!res.ok) return null;
 
 	if (res.headers.has("content-length")) {
-		const size = Number.parseInt(res.headers.get("content-length") || "0", 10);
+		const size = Number.parseInt(
+			res.headers.get("content-length") || "0",
+			10,
+		);
 		if (size > 1024 * 100) return null;
 	}
 
@@ -43,7 +61,7 @@ async function fetchAndCacheReadme(url: string): Promise<string | null> {
 
 	const html = /\.(html?|htm)$/i.test(url) ? text : await marked.parse(text);
 
-	const safe = await addLazyLoading(html);
+	const safe = await sanitizeHtml(html);
 
 	await redis.set(cacheKey, safe);
 	await redis.expire(cacheKey, redisTtl);
@@ -89,7 +107,8 @@ async function handler(request: ExtendedRequest): Promise<Response> {
 	return new Response(safe, {
 		headers: {
 			"Content-Type": "text/html; charset=utf-8",
-			"Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+			"Cache-Control":
+				"no-store, no-cache, must-revalidate, proxy-revalidate",
 			Pragma: "no-cache",
 			Expires: "0",
 		},
