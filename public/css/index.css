@@ -248,6 +248,10 @@ body {
 	text-align: center;
 	gap: 0.5rem;
 }
+.user-info-inner a {
+	text-decoration: none;
+	color: var(--link-color);
+}
 
 .user-info-inner h1 {
 	font-size: 2rem;

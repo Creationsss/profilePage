@@ -336,10 +336,10 @@ async function updatePresence(data) {
 		const loadingOverlay = document.getElementById("loading-overlay");
 		if (loadingOverlay) {
 			loadingOverlay.innerHTML = `
-				<div class="error-message">
-					<p>Failed to load user data.</p>
-				</div>
-			`;
+					<div class="error-message">
+						<p>Failed to load user data.</p>
+					</div>
+				`;
 			loadingOverlay.style.opacity = "1";
 			avatarWrapper.classList.add("hidden");
 			avatarImg.classList.add("hidden");
@@ -347,17 +347,6 @@ async function updatePresence(data) {
 			document.title = "Error";
 		}
 		return;
-	}
-
-	if (!badgesLoaded) {
-		loadBadges(userId, {
-			services: [],
-			seperated: true,
-			cache: true,
-			targetId: "badges",
-			serviceOrder: ["discord", "equicord", "reviewdb", "vencord"],
-		});
-		badgesLoaded = true;
 	}
 
 	if (avatarImg && data.discord_user?.avatar) {
@@ -371,10 +360,11 @@ async function updatePresence(data) {
 			siteIcon.href = newAvatarUrl;
 		}
 	}
+
 	if (usernameEl) {
 		const username =
 			data.discord_user.global_name || data.discord_user.username;
-		usernameEl.textContent = username;
+		usernameEl.innerHTML = `<a href="https://discord.com/users/${data.discord_user.id}" target="_blank" rel="noopener noreferrer">${username}</a>`;
 		document.title = username;
 	}
 
@@ -438,6 +428,17 @@ async function updatePresence(data) {
 		avatarWrapper.appendChild(statusDiv);
 	} else {
 		updatedStatusIndicator.className = `status-indicator ${status}`;
+	}
+
+	if (!badgesLoaded) {
+		await loadBadges(userId, {
+			services: [],
+			seperated: true,
+			cache: true,
+			targetId: "badges",
+			serviceOrder: ["discord", "equicord", "reviewdb", "vencord"],
+		});
+		badgesLoaded = true;
 	}
 
 	const custom = data.activities?.find((a) => a.type === 4);
