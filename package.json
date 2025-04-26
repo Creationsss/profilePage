@@ -22,7 +22,6 @@
 		"@creations.works/logger": "^1.0.3",
 		"ejs": "^3.1.10",
 		"isomorphic-dompurify": "^2.23.0",
-		"marked": "^15.0.7",
-		"node-vibrant": "^4.0.3"
+		"marked": "^15.0.7"
 	}
 }

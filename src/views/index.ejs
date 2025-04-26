@@ -5,230 +5,48 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-	<%
-	const displayName = username.endsWith('s') ? `${username}'` : `${username}'s`;
-	const profileUrl = `https://discord.com/users/${user.id}`;
-	%>
-	<meta property="og:title" content="<%= displayName %> Discord Presence">
-	<meta property="og:description" content="<%= activities?.[0]?.state || 'See what ' + displayName + ' is doing on Discord.' %>">
-	<meta property="og:image" content="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>">
-	<meta name="twitter:card" content="summary_large_image">
-
-	<title><%= title %></title>
+	<title>Discord Presence</title>
 
 	<link rel="stylesheet" href="/public/css/index.css">
-	<script src="/public/js/index.js" defer></script>
-
-	<% if (extraOptions.snow) { %>
-	<script src="/public/js/snow.js" defer></script>
-	<% } %>
-	<% if(extraOptions.rain) { %>
-	<script src="/public/js/rain.js" defer></script>
-	<% } %>
-	<% if (extraOptions.stars) { %>
-	<script src="/public/js/stars.js" defer></script>
-	<% } %>
+	<link rel="stylesheet" href="/public/css/root.css">
 
 	<meta name="color-scheme" content="dark">
-
-	<link rel="icon" href="<%= avatar %>" type="image/png">
+	<link rel="icon" id="site-icon" type="image/png">
 </head>
 
 <body>
-	<%- include("partial/style.ejs") %>
-	<a href="https://git.creations.works/creations/profilePage" tareget="_blank" rel="noopener noreferrer">
+	<div id="loading-overlay">
+		<div class="loading-spinner"></div>
+	</div>
+
+	<a href="https://git.creations.works/creations/profilePage" target="_blank" rel="noopener noreferrer">
 		<img class="open-source-logo" src="/public/assets/forgejo_logo.svg" alt="Forgejo Logo" style="opacity: 0.5;">
 	</a>
 
 	<div class="user-card">
 		<div class="avatar-status-wrapper">
 			<div class="avatar-wrapper">
-				<img class="avatar" src="<%= avatar %>" alt="Avatar">
-				<% if (user.avatar_decoration_data) { %>
-				<img class="decoration" src="https://cdn.discordapp.com/avatar-decoration-presets/<%= user.avatar_decoration_data.asset %>" alt="Decoration">
-				<% } %>
-				<% if (platform.mobile) { %>
-				<svg class="platform-icon mobile-only <%= status %>" viewBox="0 0 1000 1500" aria-label="Mobile" width="17" height="17">
-					<path d="M 187 0 L 813 0 C 916.277 0 1000 83.723 1000 187 L 1000 1313 C 1000 1416.277 916.277 1500 813 1500 L 187 1500 C 83.723 1500 0 1416.277 0 1313 L 0 187 C 0 83.723 83.723 0 187 0 Z M 125 1000 L 875 1000 L 875 250 L 125 250 Z M 500 1125 C 430.964 1125 375 1180.964 375 1250 C 375 1319.036 430.964 1375 500 1375 C 569.036 1375 625 1319.036 625 1250 C 625 1180.964 569.036 1125 500 1125 Z" />
-				</svg>
-				<% } else { %>
-				<div class="status-indicator <%= status %>"></div>
-				<% } %>
+				<img class="avatar hidden" src="">
+				<div class="status-indicator offline"></div>
 			</div>
 			<div class="user-info">
 				<div class="user-info-inner">
-					<h1><%= username %></h1>
-					<% if (user.clan && user.clan.tag) { %>
-					<div class="clan-badge">
-						<img src="https://cdn.discordapp.com/clan-badges/<%= user.clan.identity_guild_id %>/<%= user.clan.badge %>" alt="Clan Badge" class="clan-badge">
-						<span class="clan-name"><%= user.clan.tag %></span>
-					</div>
-					<% } %>
+					<h1 class="username"></h1>
 				</div>
-				<% if (activities.length && activities[0].type === 4) {
-					const emoji = activities[0].emoji;
-					const isCustom = emoji?.id;
-					const emojiUrl = isCustom
-						? `https://cdn.discordapp.com/emojis/${emoji.id}.${emoji.animated ? "gif" : "png"}`
-						: null;
-				%>
-				<p class="custom-status">
-					<% if (isCustom && emojiUrl) { %>
-					<img src="<%= emojiUrl %>" alt="<%= emoji.name %>" class="custom-emoji">
-					<% } else if (emoji?.name) { %>
-					<%= emoji.name %>
-					<% } %>
-					<% if (activities[0].state) { %>
-					<span class="custom-status-text"><%= activities[0].state %></span>
-					<% } %>
-				</p>
-				<% } %>
 			</div>
 		</div>
 	</div>
 
-	<% if(badgeApi) { %>
-	<div id="badges" class="badges"></div>
-	<% } %>
-	<%
-		let filtered = activities
-			.filter(a => a.type !== 4)
-			.sort((a, b) => {
-				const priority = { 2: 0, 1: 1, 3: 2 };
-				const aPriority = priority[a.type] ?? 99;
-				const bPriority = priority[b.type] ?? 99;
-				return aPriority - bPriority;
-			});
-	%>
+	<div id="badges" class="badges hidden"></div>
 
-	<h2 class="activity-header <%= filtered.length === 0 ? 'hidden' : '' %>">Activities</h2>
-	<ul class="activities">
-		<% filtered.forEach(activity => {
-			const start = activity.timestamps?.start;
-			const end = activity.timestamps?.end;
-			const now = Date.now();
-			const elapsed = start ? now - start : 0;
-			const total = (start && end) ? end - start : null;
-			const progress = (total && elapsed > 0) ? Math.min(100, Math.floor((elapsed / total) * 100)) : null;
+	<h2 class="activity-header hidden">Activities</h2>
+	<ul class="activities"></ul>
 
-			let art = null;
-			let smallArt = null;
-
-			function resolveActivityImage(img, applicationId) {
-				if (!img) return null;
-				if (img.startsWith("mp:external/")) {
-					return `https://media.discordapp.net/external/${img.slice("mp:external/".length)}`;
-				}
-				if (img.includes("/https/")) {
-					const clean = img.split("/https/")[1];
-					return clean ? `https://${clean}` : null;
-				}
-				if (img.startsWith("spotify:")) {
-					return `https://i.scdn.co/image/${img.split(":")[1]}`;
-				}
-				return `https://cdn.discordapp.com/app-assets/${applicationId}/${img}.png`;
-			}
-
-			if (activity.assets) {
-				art = resolveActivityImage(activity.assets.large_image, activity.application_id);
-				smallArt = resolveActivityImage(activity.assets.small_image, activity.application_id);
-			}
-
-			const activityTypeMap = {
-				0: "Playing",
-				1: "Streaming",
-				2: "Listening",
-				3: "Watching",
-				4: "Custom Status",
-				5: "Competing",
-			};
-
-			const activityType = activity.name === "Spotify"
-				? "Listening to Spotify"
-				: activity.name === "TIDAL"
-				? "Listening to TIDAL"
-				: activityTypeMap[activity.type] || "Playing";
-		%>
-		<li class="activity">
-			<div class="activity-wrapper">
-				<div class="activity-type-wrapper">
-					<span class="activity-type-label" data-type="<%= activity.type %>"><%= activityType %></span>
-					<% if (start && progress === null) { %>
-					<div class="activity-timestamp" data-start="<%= start %>">
-						<% const started = new Date(start); %>
-						<span>
-							Since: <%= started.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) %> <span class="elapsed"></span>
-						</span>
-					</div>
-					<% } %>
-				</div>
-				<div class="activity-wrapper-inner">
-					<div class="activity-image-wrapper <%= art ?? "no-asset" %>">
-						<img class="activity-image <%= art ? '' : 'no-asset' %>" src="<%= art || '' %>" data-name="<%= activity.name.replace(/"/g, '&quot;') %>" <%= activity.assets?.large_text ? `title="${activity.assets.large_text}"` : '' %>>
-						<img class="activity-image-small <%= smallArt ?? "no-asset" %>" src="<%= smallArt %>" <%= activity.assets?.small_text ? `title="${activity.assets.small_text}"` : '' %>>
-					</div>
-					<div class="activity-content">
-						<div class="inner-content">
-							<%
-									const isMusic = activity.type === 2 || activity.type === 3;
-									const primaryLine = isMusic ? activity.details : activity.name;
-									const secondaryLine = isMusic ? activity.state : activity.details;
-									const tertiaryLine = isMusic ? activity.assets?.large_text : activity.state;
-								%>
-							<div class="activity-top">
-								<div class="activity-header <%= progress !== null ? 'no-timestamp' : '' %>">
-									<span class="activity-name"><%= primaryLine %></span>
-								</div>
-								<% if (secondaryLine) { %>
-								<div class="activity-detail"><%= secondaryLine %></div>
-								<% } %>
-								<% if (tertiaryLine) { %>
-								<div class="activity-detail"><%= tertiaryLine %></div>
-								<% } %>
-							</div>
-							<div class="activity-bottom">
-								<% if (activity.buttons && activity.buttons.length > 0) { %>
-								<div class="activity-buttons">
-									<% activity.buttons.forEach((button, index) => {
-												const buttonLabel = typeof button === 'string' ? button : button.label;
-												let buttonUrl = null;
-												if (typeof button === 'object' && button.url) {
-													buttonUrl = button.url;
-												} else if (index === 0 && activity.url) {
-													buttonUrl = activity.url;
-												}
-											%>
-									<% if (buttonUrl) { %>
-									<a href="<%= buttonUrl %>" class="activity-button" target="_blank" rel="noopener noreferrer"><%= buttonLabel %></a>
-									<% } %>
-									<% }) %>
-								</div>
-								<% } %>
-							</div>
-						</div>
-					</div>
-				</div>
-				<% if (progress !== null) { %>
-				<div class="progress-bar" data-start="<%= start %>" data-end="<%= end %>">
-					<div class="progress-fill" <%= progress !== null ? `style="width: ${progress}%"` : '' %>></div>
-				</div>
-				<% if (start && end) { %>
-				<div class="progress-time-labels" data-start="<%= start %>" data-end="<%= end %>">
-					<span class="progress-current"></span>
-					<span class="progress-total"><%= Math.floor((end - start) / 60000) %>:<%= String(Math.floor(((end - start) % 60000) / 1000)).padStart(2, "0") %></span>
-				</div>
-				<% } %>
-				<% } %>
-			</div>
-		</li>
-		<% }); %>
-	</ul>
-
-	<% if (readme) { %>
-	<section class="readme">
-		<div class="markdown-body"><%- readme %></div>
+	<section class="readme hidden">
+		<div class="markdown-body"></div>
 	</section>
-	<% } %>
+
+	<script src="/public/js/index.js"></script>
 </body>
 
 </html>

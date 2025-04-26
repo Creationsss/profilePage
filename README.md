@@ -72,7 +72,7 @@ These can be defined in Lanyard's KV store to customize the page:
 | `stars`   | Enables starfield background (`true` / `false`)                    |
 | `badges`  | Enables badge fetching (`true` / `false`)                          |
 | `readme`  | URL to a README displayed on the profile (`.md` or `.html`)        |
-| `colors`  | Enables avatar-based color theming (uses `node-vibrant`)           |
+| `css`     | URL to a css to change styles on the page, no import or require allowed |
 
 ---
 

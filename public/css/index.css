@@ -40,6 +40,39 @@
 	}
 }
 
+#loading-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background: rgba(0, 0, 0, 0.8);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 99999;
+
+	transition: opacity 0.5s ease;
+}
+
+.loading-spinner {
+	width: 50px;
+	height: 50px;
+	border: 5px solid var(--border-color);
+	border-top: 5px solid var(--progress-fill);
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
 /* actual styles below */
 body {
 	font-family: system-ui, sans-serif;

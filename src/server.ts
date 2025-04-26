@@ -109,6 +109,8 @@ class ServerHandler {
 		let requestBody: unknown = {};
 		let response: Response;
 
+		let logRequest = true;
+
 		if (match) {
 			const { filePath, params, query } = match;
 
@@ -118,6 +120,8 @@ class ServerHandler {
 				const actualContentType: string | null = contentType
 					? contentType.split(";")[0].trim()
 					: null;
+
+				logRequest = routeModule.routeDef.log !== false;
 
 				if (
 					routeModule.routeDef.needsBody === "json" &&
@@ -227,27 +231,29 @@ class ServerHandler {
 			);
 		}
 
-		const headers = request.headers;
-		let ip = server.requestIP(request)?.address;
+		if (logRequest) {
+			const headers = request.headers;
+			let ip = server.requestIP(request)?.address;
 
-		if (!ip || ip.startsWith("172.") || ip === "127.0.0.1") {
-			ip =
-				headers.get("CF-Connecting-IP")?.trim() ||
-				headers.get("X-Real-IP")?.trim() ||
-				headers.get("X-Forwarded-For")?.split(",")[0].trim() ||
-				"unknown";
+			if (!ip || ip.startsWith("172.") || ip === "127.0.0.1") {
+				ip =
+					headers.get("CF-Connecting-IP")?.trim() ||
+					headers.get("X-Real-IP")?.trim() ||
+					headers.get("X-Forwarded-For")?.split(",")[0].trim() ||
+					"unknown";
+			}
+
+			logger.custom(
+				`[${request.method}]`,
+				`(${response.status})`,
+				[
+					request.url,
+					`${(performance.now() - extendedRequest.startPerf).toFixed(2)}ms`,
+					ip || "unknown",
+				],
+				"90",
+			);
 		}
-
-		logger.custom(
-			`[${request.method}]`,
-			`(${response.status})`,
-			[
-				request.url,
-				`${(performance.now() - extendedRequest.startPerf).toFixed(2)}ms`,
-				ip || "unknown",
-			],
-			"90",
-		);
 
 		return response;
 	}

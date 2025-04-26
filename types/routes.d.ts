@@ -3,6 +3,7 @@ type RouteDef = {
 	accepts: string | null | string[];
 	returns: string;
 	needsBody?: "multipart" | "json";
+	log?: boolean;
 };
 
 type RouteModule = {
@@ -12,11 +13,4 @@ type RouteModule = {
 		server: BunServer,
 	) => Promise<Response> | Response;
 	routeDef: RouteDef;
-};
-
-type Palette = Awaited<ReturnType<typeof Vibrant.prototype.getPalette>>;
-type Swatch = Awaited<ReturnType<typeof Vibrant.prototype.getSwatches>>;
-type ImageColorResult = {
-	img: string;
-	colors: Palette | Record<string, string>;
 };

@@ -353,13 +353,45 @@ if (badgeURL && badgeURL !== "null" && userId) {
 	});
 }
 
-function updatePresence(data) {
-	const avatarWrapper = document.querySelector(".avatar-wrapper");
-	const statusIndicator = avatarWrapper?.querySelector(".status-indicator");
-	const mobileIcon = avatarWrapper?.querySelector(".platform-icon.mobile-only");
+async function updatePresence(data) {
+	const cssLink = data.kv?.css;
 
-	const userInfo = document.querySelector(".user-info");
-	const customStatus = userInfo?.querySelector(".custom-status");
+	if (cssLink) {
+		try {
+			const res = await fetch(`/api/css?url=${encodeURIComponent(cssLink)}`);
+			if (!res.ok) throw new Error("Failed to fetch CSS");
+
+			const cssText = await res.text();
+			const style = document.createElement("style");
+			style.textContent = cssText;
+			document.head.appendChild(style);
+		} catch (err) {
+			console.error("Failed to load CSS", err);
+		}
+	}
+
+	const avatarWrapper = document.querySelector(".avatar-wrapper");
+
+	const avatarImg = document.querySelector(".avatar-wrapper .avatar");
+	const usernameEl = document.querySelector(".username");
+
+	if (avatarImg && data.discord_user?.avatar) {
+		const newAvatarUrl = `https://cdn.discordapp.com/avatars/${data.discord_user.id}/${data.discord_user.avatar}`;
+		avatarImg.src = newAvatarUrl;
+		avatarImg.classList.remove("hidden");
+
+		const siteIcon = document.getElementById("site-icon");
+
+		if (siteIcon) {
+			siteIcon.href = newAvatarUrl;
+		}
+	}
+	if (usernameEl) {
+		const username =
+			data.discord_user.global_name || data.discord_user.username;
+		usernameEl.textContent = username;
+		document.title = username;
+	}
 
 	const platform = {
 		mobile: data.active_on_discord_mobile,
@@ -374,36 +406,50 @@ function updatePresence(data) {
 		status = data.discord_status;
 	}
 
-	if (statusIndicator) {
-		statusIndicator.className = `status-indicator ${status}`;
-	}
+	let updatedStatusIndicator = avatarWrapper.querySelector(".status-indicator");
+	const updatedMobileIcon = avatarWrapper.querySelector(
+		".platform-icon.mobile-only",
+	);
 
-	if (platform.mobile && !mobileIcon) {
+	if (platform.mobile && !updatedMobileIcon) {
 		avatarWrapper.innerHTML += `
 			<svg class="platform-icon mobile-only ${status}" viewBox="0 0 1000 1500" fill="#43a25a" aria-label="Mobile" width="17" height="17">
 				<path d="M 187 0 L 813 0 C 916.277 0 1000 83.723 1000 187 L 1000 1313 C 1000 1416.277 916.277 1500 813 1500 L 187 1500 C 83.723 1500 0 1416.277 0 1313 L 0 187 C 0 83.723 83.723 0 187 0 Z M 125 1000 L 875 1000 L 875 250 L 125 250 Z M 500 1125 C 430.964 1125 375 1180.964 375 1250 C 375 1319.036 430.964 1375 500 1375 C 569.036 1375 625 1319.036 625 1250 C 625 1180.964 569.036 1125 500 1125 Z"/>
 			</svg>
 		`;
-	} else if (!platform.mobile && mobileIcon) {
-		mobileIcon.remove();
+	} else if (!platform.mobile && updatedMobileIcon) {
+		updatedMobileIcon.remove();
 		avatarWrapper.innerHTML += `<div class="status-indicator ${status}"></div>`;
 	}
 
-	const custom = data.activities?.find((a) => a.type === 4);
-	if (customStatus && custom) {
-		let emojiHTML = "";
-		const emoji = custom.emoji;
-		if (emoji?.id) {
-			const emojiUrl = `https://cdn.discordapp.com/emojis/${emoji.id}.${emoji.animated ? "gif" : "png"}`;
-			emojiHTML = `<img src="${emojiUrl}" alt="${emoji.name}" class="custom-emoji">`;
-		} else if (emoji?.name) {
-			emojiHTML = `${emoji.name} `;
-		}
-		customStatus.innerHTML = `
-			${emojiHTML}
-			${custom.state ? `<span class="custom-status-text">${custom.state}</span>` : ""}
-		`;
+	updatedStatusIndicator = avatarWrapper.querySelector(".status-indicator");
+
+	if (updatedStatusIndicator) {
+		updatedStatusIndicator.className = `status-indicator ${status}`;
 	}
+
+	const readmeSection = document.querySelector(".readme");
+
+	if (readmeSection && data.kv?.readme) {
+		const url = data.kv.readme;
+		try {
+			const res = await fetch(`/api/readme?url=${encodeURIComponent(url)}`);
+			if (!res.ok) throw new Error("Failed to fetch readme");
+
+			const text = await res.text();
+
+			readmeSection.innerHTML = `<div class="markdown-body">${text}</div>`;
+			readmeSection.classList.remove("hidden");
+		} catch (err) {
+			console.error("Failed to load README", err);
+			readmeSection.classList.add("hidden");
+		}
+	} else if (readmeSection) {
+		readmeSection.classList.add("hidden");
+	}
+
+	const custom = data.activities?.find((a) => a.type === 4);
+	updateCustomStatus(custom);
 
 	const filtered = data.activities
 		?.filter((a) => a.type !== 4)
@@ -427,6 +473,47 @@ function updatePresence(data) {
 		}
 		updateElapsedAndProgress();
 		getAllNoAsset();
+	}
+
+	if (data.kv?.snow === "true") loadEffectScript("snow");
+	if (data.kv?.rain === "true") loadEffectScript("rain");
+	if (data.kv?.stars === "true") loadEffectScript("stars");
+
+	const loadingOverlay = document.getElementById("loading-overlay");
+	if (loadingOverlay) {
+		loadingOverlay.style.opacity = "0";
+		setTimeout(() => loadingOverlay.remove(), 500);
+	}
+}
+
+function updateCustomStatus(custom) {
+	const userInfoInner = document.querySelector(".user-info");
+	const customStatus = userInfoInner?.querySelector(".custom-status");
+
+	if (!userInfoInner) return;
+
+	if (custom) {
+		let emojiHTML = "";
+		if (custom.emoji?.id) {
+			const emojiUrl = `https://cdn.discordapp.com/emojis/${custom.emoji.id}.${custom.emoji.animated ? "gif" : "png"}`;
+			emojiHTML = `<img src="${emojiUrl}" alt="${custom.emoji.name}" class="custom-emoji">`;
+		} else if (custom.emoji?.name) {
+			emojiHTML = `${custom.emoji.name} `;
+		}
+
+		const html = `
+			<p class="custom-status">
+				${emojiHTML}${custom.state ? `<span class="custom-status-text">${custom.state}</span>` : ""}
+			</p>
+		`;
+
+		if (customStatus) {
+			customStatus.outerHTML = html;
+		} else {
+			userInfoInner.insertAdjacentHTML("beforeend", html);
+		}
+	} else if (customStatus) {
+		customStatus.remove();
 	}
 }
 
@@ -453,4 +540,14 @@ async function getAllNoAsset() {
 			console.warn(`Failed to fetch fallback icon for "${name}"`, err);
 		}
 	}
+}
+
+function loadEffectScript(effect) {
+	const existing = document.querySelector(`script[data-effect="${effect}"]`);
+	if (existing) return;
+
+	const script = document.createElement("script");
+	script.src = `/public/js/${effect}.js`;
+	script.dataset.effect = effect;
+	document.head.appendChild(script);
 }
