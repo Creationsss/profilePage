@@ -167,7 +167,7 @@ function buildActivityHTML(activity) {
 			: "";
 
 	const activityButtons =
-		activity.buttons && activity.buttons.length > 0
+		(activity.buttons && activity.buttons.length > 0
 			? `<div class="activity-buttons">
 					${activity.buttons
 						.map((button, index) => {
@@ -188,7 +188,12 @@ function buildActivityHTML(activity) {
 						.filter(Boolean)
 						.join("")}
 				</div>`
-			: "";
+			: "") +
+		(activity.name === "Spotify" && activity.sync_id
+			? `<div class="activity-buttons">
+					<a href="https://open.spotify.com/track/${activity.sync_id}" class="activity-button" target="_blank" rel="noopener noreferrer">Listen on Spotify</a>
+			   </div>`
+			: "");
 
 	const progressBar =
 		progress !== null
