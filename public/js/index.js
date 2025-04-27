@@ -111,6 +111,11 @@ function resolveActivityImage(img, applicationId) {
 		return `https://i.scdn.co/image/${img.split(":")[1]}`;
 	}
 
+	if (img.startsWith("twitch:")) {
+		const username = img.split(":")[1];
+		return `https://static-cdn.jtvnw.net/previews-ttv/live_user_${username}-440x248.jpg`;
+	}
+
 	return `https://cdn.discordapp.com/app-assets/${applicationId}/${img}.png`;
 }
 
@@ -166,31 +171,36 @@ function buildActivityHTML(activity) {
 					</div>`
 			: "";
 
-	const activityButtons =
-		(activity.buttons && activity.buttons.length > 0
-			? `<div class="activity-buttons">
-					${activity.buttons
-						.map((button, index) => {
-							const label = typeof button === "string" ? button : button.label;
-							let url = null;
-							if (typeof button === "object" && button.url) {
-								url = button.url;
-							} else if (index === 0 && activity.url) {
-								url = activity.url;
-							}
-							return url
-								? `<a href="${url}" class="activity-button" target="_blank" rel="noopener noreferrer">${label}</a>`
-								: null;
-						})
-						.filter(Boolean)
-						.join("")}
-				</div>`
-			: "") +
-		(activity.name === "Spotify" && activity.sync_id
-			? `<div class="activity-buttons">
-					<a href="https://open.spotify.com/track/${activity.sync_id}" class="activity-button" target="_blank" rel="noopener noreferrer">Listen on Spotify</a>
-			   </div>`
-			: "");
+	const buttons = (activity.buttons || [])
+		.map((button, index) => {
+			const label = typeof button === "string" ? button : button.label;
+			let url = null;
+			if (typeof button === "object" && button.url) {
+				url = button.url;
+			} else if (index === 0 && activity.url) {
+				url = activity.url;
+			}
+			return url
+				? `<a href="${url}" class="activity-button" target="_blank" rel="noopener noreferrer">${label}</a>`
+				: null;
+		})
+		.filter(Boolean);
+
+	if (!buttons.length && activity.name === "Twitch" && activity.url) {
+		buttons.push(
+			`<a href="${activity.url}" class="activity-button" target="_blank" rel="noopener noreferrer">Watch on Twitch</a>`,
+		);
+	}
+
+	if (activity.name === "Spotify" && activity.sync_id) {
+		buttons.push(
+			`<a href="https://open.spotify.com/track/${activity.sync_id}" class="activity-button" target="_blank" rel="noopener noreferrer">Listen on Spotify</a>`,
+		);
+	}
+
+	const activityButtons = buttons.length
+		? `<div class="activity-buttons">${buttons.join("")}</div>`
+		: "";
 
 	const progressBar =
 		progress !== null
