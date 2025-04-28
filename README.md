@@ -98,4 +98,4 @@ Make sure the `.env` file is configured correctly before starting the container.
 
 ## License
 
-[MIT](LICENSE)
+[BSD 3](LICENSE)
