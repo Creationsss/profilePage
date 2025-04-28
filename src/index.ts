@@ -1,6 +1,5 @@
-import { logger } from "@creations.works/logger";
-
 import { serverHandler } from "@/server";
+import { logger } from "@creations.works/logger";
 
 async function main(): Promise<void> {
 	serverHandler.initialize();
