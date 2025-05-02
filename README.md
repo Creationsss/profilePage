@@ -2,6 +2,9 @@
 
 A cool little web app that shows your Discord profile, current activity, and more. Built with Bun.
 
+# Preview
+https://creations.works
+
 ---
 
 ## Requirements
@@ -93,6 +96,19 @@ docker compose up -d --build
 ```
 
 Make sure the `.env` file is configured correctly before starting the container.
+
+---
+
+## Routes
+
+These are the main public routes exposed by the server:
+
+| Route         | Description                                                                 |
+|---------------|-----------------------------------------------------------------------------|
+| `/`           | Loads the profile page for the default Discord user defined in `.env` (`LANYARD_USER_ID`) |
+| `/[id]`       | Loads the profile page for a specific Discord user ID passed in the URL     |
+
+> Example: `https://creations.works/209830981060788225` shows the profile of that specific user.
 
 ---
 
