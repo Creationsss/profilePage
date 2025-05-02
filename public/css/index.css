@@ -386,6 +386,7 @@ ul {
 	object-fit: cover;
 	flex-shrink: 0;
 	border-color: var(--card-bg);
+	background-color: var(--card-bg);
 	border-width: 2px;
 	border-style: solid;
 
