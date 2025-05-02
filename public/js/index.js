@@ -283,7 +283,13 @@ async function loadBadges(userId, options = {}) {
 		const res = await fetch(url);
 		const json = await res.json();
 
-		if (!res.ok || !json.badges) {
+		if (
+			!res.ok ||
+			!json.badges ||
+			Object.values(json.badges).every(
+				(arr) => !Array.isArray(arr) || arr.length === 0,
+			)
+		) {
 			target.textContent = "Failed to load badges.";
 			return;
 		}
