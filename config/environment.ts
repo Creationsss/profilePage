@@ -17,3 +17,6 @@ export const lanyardConfig: LanyardConfig = {
 export const badgeApi: string | null = process.env.BADGE_API_URL || null;
 export const steamGridDbKey: string | undefined =
 	process.env.STEAMGRIDDB_API_KEY;
+
+export const plausibleScript: string | null =
+	process.env.PLAUSIBLE_SCRIPT_HTML?.trim() || null;

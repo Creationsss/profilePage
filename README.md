@@ -29,7 +29,7 @@ https://git.creations.works/creations/badgeAPI
 
 ### 4. SteamGridDB
 
->You only have to use this if you want to fetch game icons that Discord doesn’t provide:
+>Only needed if you want to fetch game icons that Discord doesn’t provide:
 https://www.steamgriddb.com/api/v2
 
 ---
@@ -87,6 +87,28 @@ bun run start
 
 ---
 
+## Optional: Analytics with Plausible
+
+You can enable [Plausible Analytics](https://plausible.io) tracking by setting a script snippet in your environment.
+
+### `.env` Variable
+
+| Variable                | Description                                                            |
+|-------------------------|------------------------------------------------------------------------|
+| `PLAUSIBLE_SCRIPT_HTML` | Full `<script>` tag(s) to inject into the `<head>` for analytics       |
+
+#### Example
+
+```env
+PLAUSIBLE_SCRIPT_HTML='<script defer data-domain="example.com" src="https://plausible.example.com/js/script.js"></script><script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>'
+```
+
+- The script will only be injected if this variable is set.
+- Plausible provides the correct script when you add a domain.
+- Be sure to wrap it in single quotes (`'`) so it works in `.env`.
+
+---
+
 ## Docker Support
 
 ### Build & Start with Docker Compose
@@ -103,10 +125,10 @@ Make sure the `.env` file is configured correctly before starting the container.
 
 These are the main public routes exposed by the server:
 
-| Route         | Description                                                                 |
-|---------------|-----------------------------------------------------------------------------|
-| `/`           | Loads the profile page for the default Discord user defined in `.env` (`LANYARD_USER_ID`) |
-| `/[id]`       | Loads the profile page for a specific Discord user ID passed in the URL     |
+| Route   | Description                                                                 |
+|---------|-----------------------------------------------------------------------------|
+| `/`     | Loads the profile page for the default Discord user defined in `.env` (`LANYARD_USER_ID`) |
+| `/[id]` | Loads the profile page for a specific Discord user ID passed in the URL     |
 
 > Example: `https://creations.works/209830981060788225` shows the profile of that specific user.
 
