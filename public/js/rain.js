@@ -25,23 +25,28 @@ const getRaindropColor = () => {
 
 const createRaindrop = () => {
 	if (raindrops.length >= maxRaindrops) {
-		const oldestRaindrop = raindrops.shift();
-		rainContainer.removeChild(oldestRaindrop);
+		const oldest = raindrops.shift();
+		rainContainer.removeChild(oldest);
 	}
 
 	const raindrop = document.createElement("div");
 	raindrop.classList.add("raindrop");
 	raindrop.style.position = "absolute";
+	const height = Math.random() * 10 + 10;
 	raindrop.style.width = "2px";
-	raindrop.style.height = `${Math.random() * 10 + 10}px`;
+	raindrop.style.height = `${height}px`;
 	raindrop.style.background = getRaindropColor();
 	raindrop.style.borderRadius = "1px";
-	raindrop.style.left = `${Math.random() * window.innerWidth}px`;
-	raindrop.style.top = `-${raindrop.style.height}`;
 	raindrop.style.opacity = Math.random() * 0.5 + 0.3;
+
+	raindrop.x = Math.random() * window.innerWidth;
+	raindrop.y = -height;
 	raindrop.speed = Math.random() * 6 + 4;
 	raindrop.directionX = (Math.random() - 0.5) * 0.2;
 	raindrop.directionY = Math.random() * 0.5 + 0.8;
+
+	raindrop.style.left = `${raindrop.x}px`;
+	raindrop.style.top = `${raindrop.y}px`;
 
 	raindrops.push(raindrop);
 	rainContainer.appendChild(raindrop);
@@ -51,23 +56,29 @@ setInterval(createRaindrop, 50);
 
 function updateRaindrops() {
 	raindrops.forEach((raindrop, index) => {
-		const rect = raindrop.getBoundingClientRect();
+		const height = Number.parseFloat(raindrop.style.height);
 
-		raindrop.style.left = `${rect.left + raindrop.directionX * raindrop.speed}px`;
-		raindrop.style.top = `${rect.top + raindrop.directionY * raindrop.speed}px`;
+		raindrop.x += raindrop.directionX * raindrop.speed;
+		raindrop.y += raindrop.directionY * raindrop.speed;
 
-		if (rect.top + rect.height >= window.innerHeight) {
+		raindrop.style.left = `${raindrop.x}px`;
+		raindrop.style.top = `${raindrop.y}px`;
+
+		if (raindrop.y > window.innerHeight) {
 			rainContainer.removeChild(raindrop);
 			raindrops.splice(index, 1);
+			return;
 		}
 
 		if (
-			rect.left > window.innerWidth ||
-			rect.top > window.innerHeight ||
-			rect.left < 0
+			raindrop.x > window.innerWidth ||
+			raindrop.y > window.innerHeight ||
+			raindrop.x < 0
 		) {
-			raindrop.style.left = `${Math.random() * window.innerWidth}px`;
-			raindrop.style.top = `-${raindrop.style.height}`;
+			raindrop.x = Math.random() * window.innerWidth;
+			raindrop.y = -height;
+			raindrop.style.left = `${raindrop.x}px`;
+			raindrop.style.top = `${raindrop.y}px`;
 		}
 	});
 

@@ -501,7 +501,7 @@ async function updatePresence(data) {
 		});
 
 	const activityList = document.querySelector(".activities");
-	const activitiesTitle = document.querySelector(".activity-header");
+	const activitiesTitle = document.querySelector(".activity-block-header");
 
 	if (activityList && activitiesTitle) {
 		if (filtered?.length) {

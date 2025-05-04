@@ -25,16 +25,21 @@ const createSnowflake = () => {
 	const snowflake = document.createElement("div");
 	snowflake.classList.add("snowflake");
 	snowflake.style.position = "absolute";
-	snowflake.style.width = `${Math.random() * 3 + 2}px`;
-	snowflake.style.height = snowflake.style.width;
+	const size = Math.random() * 3 + 2;
+	snowflake.style.width = `${size}px`;
+	snowflake.style.height = `${size}px`;
 	snowflake.style.background = "white";
 	snowflake.style.borderRadius = "50%";
 	snowflake.style.opacity = Math.random();
-	snowflake.style.left = `${Math.random() * window.innerWidth}px`;
-	snowflake.style.top = `-${snowflake.style.height}`;
+
+	snowflake.x = Math.random() * window.innerWidth;
+	snowflake.y = -size;
 	snowflake.speed = Math.random() * 3 + 2;
 	snowflake.directionX = (Math.random() - 0.5) * 0.5;
 	snowflake.directionY = Math.random() * 0.5 + 0.5;
+
+	snowflake.style.left = `${snowflake.x}px`;
+	snowflake.style.top = `${snowflake.y}px`;
 
 	snowflakes.push(snowflake);
 	snowContainer.appendChild(snowflake);
@@ -44,10 +49,12 @@ setInterval(createSnowflake, 80);
 
 function updateSnowflakes() {
 	snowflakes.forEach((snowflake, index) => {
-		const rect = snowflake.getBoundingClientRect();
+		const size = Number.parseFloat(snowflake.style.width);
+		const centerX = snowflake.x + size / 2;
+		const centerY = snowflake.y + size / 2;
 
-		const dx = rect.left + rect.width / 2 - mouse.x;
-		const dy = rect.top + rect.height / 2 - mouse.y;
+		const dx = centerX - mouse.x;
+		const dy = centerY - mouse.y;
 		const distance = Math.sqrt(dx * dx + dy * dy);
 
 		if (distance < 30) {
@@ -58,21 +65,27 @@ function updateSnowflakes() {
 			snowflake.directionY += (Math.random() - 0.5) * 0.01;
 		}
 
-		snowflake.style.left = `${rect.left + snowflake.directionX * snowflake.speed}px`;
-		snowflake.style.top = `${rect.top + snowflake.directionY * snowflake.speed}px`;
+		snowflake.x += snowflake.directionX * snowflake.speed;
+		snowflake.y += snowflake.directionY * snowflake.speed;
 
-		if (rect.top + rect.height >= window.innerHeight) {
+		snowflake.style.left = `${snowflake.x}px`;
+		snowflake.style.top = `${snowflake.y}px`;
+
+		if (snowflake.y > window.innerHeight) {
 			snowContainer.removeChild(snowflake);
 			snowflakes.splice(index, 1);
+			return;
 		}
 
 		if (
-			rect.left > window.innerWidth ||
-			rect.top > window.innerHeight ||
-			rect.left < 0
+			snowflake.x > window.innerWidth ||
+			snowflake.y > window.innerHeight ||
+			snowflake.x < 0
 		) {
-			snowflake.style.left = `${Math.random() * window.innerWidth}px`;
-			snowflake.style.top = `-${snowflake.style.height}`;
+			snowflake.x = Math.random() * window.innerWidth;
+			snowflake.y = -size;
+			snowflake.style.left = `${snowflake.x}px`;
+			snowflake.style.top = `${snowflake.y}px`;
 		}
 	});
 

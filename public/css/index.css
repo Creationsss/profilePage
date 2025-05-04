@@ -350,6 +350,14 @@ ul {
 	margin: 0;
 }
 
+.activities-section .activity-block-header {
+	margin: 1rem 0 .5rem;
+	font-size: 2rem;
+	font-weight: 600;
+
+	text-align: center;
+}
+
 .activities {
 	display: flex;
 	flex-direction: column;

@@ -11,48 +11,46 @@ document.body.appendChild(container);
 
 for (let i = 0; i < 60; i++) {
 	const star = document.createElement("div");
+	star.className = "star";
 	const size = Math.random() * 2 + 1;
-	star.style.position = "absolute";
 	star.style.width = `${size}px`;
 	star.style.height = `${size}px`;
-	star.style.background = "white";
-	star.style.borderRadius = "50%";
 	star.style.opacity = Math.random();
 	star.style.top = `${Math.random() * 100}vh`;
 	star.style.left = `${Math.random() * 100}vw`;
-	star.style.animation = `twinkle ${Math.random() * 3 + 2}s infinite alternate ease-in-out`;
+	star.style.animationDuration = `${Math.random() * 3 + 2}s`;
 	container.appendChild(star);
 }
 
 function createShootingStar() {
 	const star = document.createElement("div");
-	star.classList.add("shooting-star");
+	star.className = "shooting-star";
 
-	let x = Math.random() * window.innerWidth * 0.8;
-	let y = Math.random() * window.innerHeight * 0.3;
+	star.x = Math.random() * window.innerWidth * 0.8;
+	star.y = Math.random() * window.innerHeight * 0.3;
 	const angle = (Math.random() * Math.PI) / 6 + Math.PI / 8;
 	const speed = 10;
 	const totalFrames = 60;
+	let frame = 0;
 
 	const deg = angle * (180 / Math.PI);
-	star.style.left = `${x}px`;
-	star.style.top = `${y}px`;
+	star.style.left = `${star.x}px`;
+	star.style.top = `${star.y}px`;
 	star.style.transform = `rotate(${deg}deg)`;
 
 	container.appendChild(star);
 
-	let frame = 0;
 	function animate() {
-		x += Math.cos(angle) * speed;
-		y += Math.sin(angle) * speed;
-		star.style.left = `${x}px`;
-		star.style.top = `${y}px`;
+		star.x += Math.cos(angle) * speed;
+		star.y += Math.sin(angle) * speed;
+		star.style.left = `${star.x}px`;
+		star.style.top = `${star.y}px`;
 		star.style.opacity = `${1 - frame / totalFrames}`;
 
 		frame++;
 		if (frame < totalFrames) {
 			requestAnimationFrame(animate);
-		} else {
+		} else if (star.parentNode === container) {
 			container.removeChild(star);
 		}
 	}
