@@ -335,9 +335,10 @@ async function loadBadges(userId, options = {}) {
 
 async function populateReadme(data) {
 	const readmeSection = document.querySelector(".readme");
+	const kv = data.kv || {};
 
-	if (readmeSection && data.kv?.readme) {
-		const url = data.kv.readme;
+	if (readmeSection && kv.readme) {
+		const url = kv.readme;
 		try {
 			const res = await fetch(`/api/readme?url=${encodeURIComponent(url)}`);
 			if (!res.ok) throw new Error("Failed to fetch readme");
@@ -355,8 +356,33 @@ async function populateReadme(data) {
 	}
 }
 
-async function updatePresence(data) {
-	const cssLink = data.kv?.css;
+async function updatePresence(initialData) {
+	if (
+		!initialData ||
+		typeof initialData !== "object" ||
+		initialData.success === false ||
+		initialData.error
+	) {
+		const loadingOverlay = document.getElementById("loading-overlay");
+		if (loadingOverlay) {
+			loadingOverlay.innerHTML = `
+				<div class="error-message">
+					<p>${initialData?.error?.message || "Failed to load presence data."}</p>
+				</div>
+			`;
+			loadingOverlay.style.opacity = "1";
+		}
+		return;
+	}
+
+	const data =
+		initialData?.d && Object.keys(initialData.d).length > 0
+			? initialData.d
+			: initialData;
+
+	const kv = data.kv || {};
+
+	const cssLink = kv.css;
 	if (cssLink) {
 		try {
 			const res = await fetch(`/api/css?url=${encodeURIComponent(cssLink)}`);
@@ -371,7 +397,7 @@ async function updatePresence(data) {
 		}
 	}
 
-	if (!badgesLoaded && data && data.kv.badges !== "false") {
+	if (!badgesLoaded && data?.kv && data.kv.badges !== "false") {
 		loadBadges(userId, {
 			services: [],
 			seperated: true,
@@ -515,9 +541,9 @@ async function updatePresence(data) {
 		getAllNoAsset();
 	}
 
-	if (data.kv?.snow === "true") loadEffectScript("snow");
-	if (data.kv?.rain === "true") loadEffectScript("rain");
-	if (data.kv?.stars === "true") loadEffectScript("stars");
+	if (kv.snow === "true") loadEffectScript("snow");
+	if (kv.rain === "true") loadEffectScript("rain");
+	if (kv.stars === "true") loadEffectScript("stars");
 
 	const loadingOverlay = document.getElementById("loading-overlay");
 	if (loadingOverlay) {
@@ -643,6 +669,19 @@ if (userId && instanceUri) {
 	socket.addEventListener("message", (event) => {
 		const payload = JSON.parse(event.data);
 
+		if (payload.error || payload.success === false) {
+			const loadingOverlay = document.getElementById("loading-overlay");
+			if (loadingOverlay) {
+				loadingOverlay.innerHTML = `
+					<div class="error-message">
+						<p>${payload.error?.message || "An unknown error occurred."}</p>
+					</div>
+				`;
+				loadingOverlay.style.opacity = "1";
+			}
+			return;
+		}
+
 		if (payload.op === 1 && payload.d?.heartbeat_interval) {
 			heartbeatInterval = setInterval(() => {
 				socket.send(JSON.stringify({ op: 3 }));
@@ -659,8 +698,8 @@ if (userId && instanceUri) {
 		}
 
 		if (payload.t === "INIT_STATE" || payload.t === "PRESENCE_UPDATE") {
-			updatePresence(payload.d);
-			requestAnimationFrame(() => updateElapsedAndProgress());
+			updatePresence(payload);
+			requestAnimationFrame(updateElapsedAndProgress);
 		}
 	});
 
