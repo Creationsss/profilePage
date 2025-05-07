@@ -382,6 +382,19 @@ async function updatePresence(initialData) {
 
 	const kv = data.kv || {};
 
+	if (kv.optout === "true") {
+		const loadingOverlay = document.getElementById("loading-overlay");
+		if (loadingOverlay) {
+			loadingOverlay.innerHTML = `
+				<div class="error-message">
+					<p>This user has opted out of sharing their presence.</p>
+				</div>
+			`;
+			loadingOverlay.style.opacity = "1";
+		}
+		return;
+	}
+
 	const cssLink = kv.css;
 	if (cssLink) {
 		try {

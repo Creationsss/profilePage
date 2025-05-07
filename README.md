@@ -76,6 +76,7 @@ These can be defined in Lanyard's KV store to customize the page:
 | `badges`  | Enables badge fetching (`true` / `false`)                          |
 | `readme`  | URL to a README displayed on the profile (`.md` or `.html`)        |
 | `css`     | URL to a css to change styles on the page, no import or require allowed |
+| `optout`  | Allows users to stop sharing there profile on the website (`true` / `false`) |
 
 ---
 
