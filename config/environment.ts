@@ -14,6 +14,11 @@ export const lanyardConfig: LanyardConfig = {
 	instance: process.env.LANYARD_INSTANCE || "https://api.lanyard.rest",
 };
 
+export const reviewDb = {
+	enabled: process.env.REVIEW_DB === "true" || process.env.REVIEW_DB === "1",
+	url: "https://manti.vendicated.dev/api/reviewdb",
+};
+
 export const badgeApi: string | null = process.env.BADGE_API_URL || null;
 export const steamGridDbKey: string | undefined =
 	process.env.STEAMGRIDDB_API_KEY;

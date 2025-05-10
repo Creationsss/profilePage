@@ -2,10 +2,18 @@ const head = document.querySelector("head");
 const userId = head?.dataset.userId;
 const activityProgressMap = new Map();
 
+const reviewURL = head?.dataset.reviewDb;
 let instanceUri = head?.dataset.instanceUri;
 let badgeURL = head?.dataset.badgeUrl;
 let socket;
+
 let badgesLoaded = false;
+let readmeLoaded = false;
+let cssLoaded = false;
+
+let currentReviewPage = 1;
+let hasMoreReviews = true;
+let isLoadingReviews = false;
 
 function formatTime(ms) {
 	const totalSecs = Math.floor(ms / 1000);
@@ -117,6 +125,93 @@ function resolveActivityImage(img, applicationId) {
 	}
 
 	return `https://cdn.discordapp.com/app-assets/${applicationId}/${img}.png`;
+}
+
+async function populateReviews(userId, page = 1) {
+	if (!reviewURL || !userId || isLoadingReviews || !hasMoreReviews) return;
+	const reviewSection = document.querySelector(".reviews");
+	const reviewList = reviewSection?.querySelector(".reviews-list");
+	if (!reviewList) return;
+
+	isLoadingReviews = true;
+
+	try {
+		const url = `${reviewURL}/users/${userId}/reviews?page=${page}`;
+		const res = await fetch(url);
+		const data = await res.json();
+
+		if (!data.success || !Array.isArray(data.reviews)) {
+			if (page === 1) reviewSection.classList.add("hidden");
+			isLoadingReviews = false;
+			return;
+		}
+
+		const reviewsHTML = data.reviews
+			.slice(1)
+			.map((review) => {
+				const sender = review.sender;
+				const username = sender.username;
+				const avatar = sender.profilePhoto;
+				const comment = review.comment;
+				const timestamp = review.timestamp
+					? new Date(review.timestamp * 1000).toLocaleString()
+					: "N/A";
+
+				const badges = (sender.badges || [])
+					.map(
+						(b) =>
+							`<img src="${b.icon}" class="badge" title="${b.description}" alt="${b.name}" />`,
+					)
+					.join("");
+
+				return `
+				<li class="review">
+					<img class="review-avatar" src="${avatar}" alt="${username}'s avatar"/>
+					<div class="review-body">
+						<div class="review-header">
+							<span class="review-username">${username}</span>
+							<span class="review-timestamp">${timestamp}</span>
+						</div>
+						<div class="review-badges">${badges}</div>
+						<div class="review-content">${comment}</div>
+					</div>
+				</li>
+			`;
+			})
+			.join("");
+
+		if (page === 1) reviewList.innerHTML = reviewsHTML;
+		else reviewList.insertAdjacentHTML("beforeend", reviewsHTML);
+
+		reviewSection.classList.remove("hidden");
+
+		hasMoreReviews = data.hasNextPage;
+		currentReviewPage = page;
+		isLoadingReviews = false;
+	} catch (err) {
+		console.error("Failed to fetch reviews", err);
+		isLoadingReviews = false;
+	}
+}
+
+function setupReviewScrollObserver(userId) {
+	const sentinel = document.createElement("div");
+	sentinel.className = "review-scroll-sentinel";
+	document.querySelector(".reviews").appendChild(sentinel);
+
+	const observer = new IntersectionObserver(
+		(entries) => {
+			if (entries[0].isIntersecting && hasMoreReviews) {
+				populateReviews(userId, currentReviewPage + 1);
+			}
+		},
+		{
+			rootMargin: "200px",
+			threshold: 0,
+		},
+	);
+
+	observer.observe(sentinel);
 }
 
 function buildActivityHTML(activity) {
@@ -334,6 +429,8 @@ async function loadBadges(userId, options = {}) {
 }
 
 async function populateReadme(data) {
+	if (readmeLoaded) return;
+
 	const readmeSection = document.querySelector(".readme");
 	const kv = data.kv || {};
 
@@ -347,6 +444,7 @@ async function populateReadme(data) {
 
 			readmeSection.innerHTML = `<div class="markdown-body">${text}</div>`;
 			readmeSection.classList.remove("hidden");
+			readmeLoaded = true;
 		} catch (err) {
 			console.error("Failed to load README", err);
 			readmeSection.classList.add("hidden");
@@ -396,7 +494,7 @@ async function updatePresence(initialData) {
 	}
 
 	const cssLink = kv.css;
-	if (cssLink) {
+	if (cssLink && !cssLoaded) {
 		try {
 			const res = await fetch(`/api/css?url=${encodeURIComponent(cssLink)}`);
 			if (!res.ok) throw new Error("Failed to fetch CSS");
@@ -405,6 +503,7 @@ async function updatePresence(initialData) {
 			const style = document.createElement("style");
 			style.textContent = cssText;
 			document.head.appendChild(style);
+			cssLoaded = true;
 		} catch (err) {
 			console.error("Failed to load CSS", err);
 		}
@@ -462,6 +561,10 @@ async function updatePresence(initialData) {
 	}
 
 	updateClanBadge(data);
+	if (kv.reviews !== "false") {
+		populateReviews(userId, 1);
+		setupReviewScrollObserver(userId);
+	}
 
 	const platform = {
 		mobile: data.active_on_discord_mobile,

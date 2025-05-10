@@ -1,5 +1,10 @@
 import { resolve } from "node:path";
-import { badgeApi, lanyardConfig, plausibleScript } from "@config/environment";
+import {
+	badgeApi,
+	lanyardConfig,
+	plausibleScript,
+	reviewDb,
+} from "@config/environment";
 import { file } from "bun";
 
 const routeDef: RouteDef = {
@@ -23,6 +28,10 @@ async function handler(request: ExtendedRequest): Promise<Response> {
 				head.setAttribute("data-user-id", id || lanyardConfig.userId);
 				head.setAttribute("data-instance-uri", instance);
 				head.setAttribute("data-badge-url", badgeApi || "");
+
+				if (reviewDb.enabled) {
+					head.setAttribute("data-review-db", reviewDb.url);
+				}
 
 				if (plausibleScript) {
 					head.append(plausibleScript, { html: true });
