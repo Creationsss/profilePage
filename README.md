@@ -62,6 +62,7 @@ cp .env.example .env
 | `LANYARD_USER_ID`     | Your Discord user ID, for the default page                                  |
 | `LANYARD_INSTANCE`    | Endpoint of the Lanyard instance                                            |
 | `BADGE_API_URL`       | Badge API URL ([badgeAPI](https://git.creations.works/creations/badgeAPI))  |
+| `REVIEW_DB`           | Enables showing reviews from reviewdb on user pages                         |
 | `STEAMGRIDDB_API_KEY` | SteamGridDB API key for fetching game icons                                 |
 
 #### Optional Lanyard KV Variables (per-user customization)
@@ -77,6 +78,7 @@ These can be defined in Lanyard's KV store to customize the page:
 | `readme`  | URL to a README displayed on the profile (`.md` or `.html`)        |
 | `css`     | URL to a css to change styles on the page, no import or require allowed |
 | `optout`  | Allows users to stop sharing there profile on the website (`true` / `false`) |
+| `reviews` | Enables reviews from reviewdb (`true` / `false`)                   |
 
 ---
 
