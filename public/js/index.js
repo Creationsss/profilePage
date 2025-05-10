@@ -11,7 +11,8 @@ let badgesLoaded = false;
 let readmeLoaded = false;
 let cssLoaded = false;
 
-let currentReviewPage = 1;
+const reviewsPerPage = 50;
+let currentReviewOffset = 0;
 let hasMoreReviews = true;
 let isLoadingReviews = false;
 
@@ -127,7 +128,7 @@ function resolveActivityImage(img, applicationId) {
 	return `https://cdn.discordapp.com/app-assets/${applicationId}/${img}.png`;
 }
 
-async function populateReviews(userId, page = 1) {
+async function populateReviews(userId) {
 	if (!reviewURL || !userId || isLoadingReviews || !hasMoreReviews) return;
 	const reviewSection = document.querySelector(".reviews");
 	const reviewList = reviewSection?.querySelector(".reviews-list");
@@ -136,7 +137,7 @@ async function populateReviews(userId, page = 1) {
 	isLoadingReviews = true;
 
 	try {
-		const url = `${reviewURL}/users/${userId}/reviews?page=${page}`;
+		const url = `${reviewURL}/users/${userId}/reviews?flags=2&offset=${currentReviewOffset}`;
 		const res = await fetch(url);
 		const data = await res.json();
 
@@ -147,7 +148,6 @@ async function populateReviews(userId, page = 1) {
 		}
 
 		const reviewsHTML = data.reviews
-			.slice(1)
 			.map((review) => {
 				const sender = review.sender;
 				const username = sender.username;
@@ -187,7 +187,7 @@ async function populateReviews(userId, page = 1) {
 			})
 			.join("");
 
-		if (page === 1) reviewList.innerHTML = reviewsHTML;
+		if (currentReviewOffset === 0) reviewList.innerHTML = reviewsHTML;
 		else reviewList.insertAdjacentHTML("beforeend", reviewsHTML);
 
 		reviewSection.classList.remove("hidden");
@@ -208,8 +208,9 @@ function setupReviewScrollObserver(userId) {
 
 	const observer = new IntersectionObserver(
 		(entries) => {
-			if (entries[0].isIntersecting && hasMoreReviews) {
-				populateReviews(userId, currentReviewPage + 1);
+			if (entries[0].isIntersecting && hasMoreReviews && !isLoadingReviews) {
+				currentReviewOffset += reviewsPerPage;
+				populateReviews(userId);
 			}
 		},
 		{
@@ -569,7 +570,7 @@ async function updatePresence(initialData) {
 
 	updateClanBadge(data);
 	if (kv.reviews !== "false") {
-		populateReviews(userId, 1);
+		populateReviews(userId);
 		setupReviewScrollObserver(userId);
 	}
 
