@@ -154,7 +154,14 @@ async function populateReviews(userId, page = 1) {
 				const avatar = sender.profilePhoto;
 				const comment = review.comment;
 				const timestamp = review.timestamp
-					? new Date(review.timestamp * 1000).toLocaleString()
+					? new Date(review.timestamp * 1000).toLocaleString(undefined, {
+							hour12: false,
+							year: "numeric",
+							month: "2-digit",
+							day: "2-digit",
+							hour: "2-digit",
+							minute: "2-digit",
+						})
 					: "N/A";
 
 				const badges = (sender.badges || [])
