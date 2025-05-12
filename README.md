@@ -64,6 +64,7 @@ cp .env.example .env
 | `BADGE_API_URL`       | Badge API URL ([badgeAPI](https://git.creations.works/creations/badgeAPI))  |
 | `REVIEW_DB`           | Enables showing reviews from reviewdb on user pages                         |
 | `STEAMGRIDDB_API_KEY` | SteamGridDB API key for fetching game icons                                 |
+| `ROBOTS_FILE`         | If there it uses the file in /robots.txt route, requires a valid path       |
 
 #### Optional Lanyard KV Variables (per-user customization)
 
