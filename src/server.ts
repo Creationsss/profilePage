@@ -1,5 +1,5 @@
 import { resolve } from "node:path";
-import { environment } from "@config/environment";
+import { environment, robotstxtPath } from "@config/environment";
 import { logger } from "@creations.works/logger";
 import {
 	type BunFile,
@@ -65,10 +65,15 @@ class ServerHandler {
 		}
 	}
 
-	private async serveStaticFile(pathname: string): Promise<Response> {
-		try {
-			let filePath: string;
+	private async serveStaticFile(
+		request: ExtendedRequest,
+		pathname: string,
+		ip: string,
+	): Promise<Response> {
+		let filePath: string;
+		let response: Response;
 
+		try {
 			if (pathname === "/favicon.ico") {
 				filePath = resolve("public", "assets", "favicon.ico");
 			} else {
@@ -81,16 +86,37 @@ class ServerHandler {
 				const fileContent: ArrayBuffer = await file.arrayBuffer();
 				const contentType: string = file.type || "application/octet-stream";
 
-				return new Response(fileContent, {
+				response = new Response(fileContent, {
 					headers: { "Content-Type": contentType },
 				});
+			} else {
+				logger.warn(`File not found: ${filePath}`);
+				response = new Response("Not Found", { status: 404 });
 			}
-			logger.warn(`File not found: ${filePath}`);
-			return new Response("Not Found", { status: 404 });
 		} catch (error) {
 			logger.error([`Error serving static file: ${pathname}`, error as Error]);
-			return new Response("Internal Server Error", { status: 500 });
+			response = new Response("Internal Server Error", { status: 500 });
 		}
+
+		this.logRequest(request, response, ip);
+		return response;
+	}
+
+	private logRequest(
+		request: ExtendedRequest,
+		response: Response,
+		ip: string | undefined,
+	): void {
+		logger.custom(
+			`[${request.method}]`,
+			`(${response.status})`,
+			[
+				request.url,
+				`${(performance.now() - request.startPerf).toFixed(2)}ms`,
+				ip || "unknown",
+			],
+			"90",
+		);
 	}
 
 	private async handleRequest(
@@ -100,16 +126,52 @@ class ServerHandler {
 		const extendedRequest: ExtendedRequest = request as ExtendedRequest;
 		extendedRequest.startPerf = performance.now();
 
+		const headers = request.headers;
+		let ip = server.requestIP(request)?.address;
+		let response: Response;
+
+		if (!ip || ip.startsWith("172.") || ip === "127.0.0.1") {
+			ip =
+				headers.get("CF-Connecting-IP")?.trim() ||
+				headers.get("X-Real-IP")?.trim() ||
+				headers.get("X-Forwarded-For")?.split(",")[0].trim() ||
+				"unknown";
+		}
+
 		const pathname: string = new URL(request.url).pathname;
+		if (pathname === "/robots.txt" && robotstxtPath) {
+			try {
+				const file: BunFile = Bun.file(robotstxtPath);
+
+				if (await file.exists()) {
+					const fileContent: ArrayBuffer = await file.arrayBuffer();
+					const contentType: string = file.type || "text/plain";
+
+					response = new Response(fileContent, {
+						headers: { "Content-Type": contentType },
+					});
+				} else {
+					logger.warn(`File not found: ${robotstxtPath}`);
+					response = new Response("Not Found", { status: 404 });
+				}
+			} catch (error) {
+				logger.error([
+					`Error serving robots.txt: ${robotstxtPath}`,
+					error as Error,
+				]);
+				response = new Response("Internal Server Error", { status: 500 });
+			}
+
+			this.logRequest(extendedRequest, response, ip);
+			return response;
+		}
+
 		if (pathname.startsWith("/public") || pathname === "/favicon.ico") {
-			return await this.serveStaticFile(pathname);
+			return await this.serveStaticFile(extendedRequest, pathname, ip);
 		}
 
 		const match: MatchedRoute | null = this.router.match(request);
 		let requestBody: unknown = {};
-		let response: Response;
-
-		let logRequest = true;
 
 		if (match) {
 			const { filePath, params, query } = match;
@@ -120,8 +182,6 @@ class ServerHandler {
 				const actualContentType: string | null = contentType
 					? contentType.split(";")[0].trim()
 					: null;
-
-				logRequest = routeModule.routeDef.log !== false;
 
 				if (
 					routeModule.routeDef.needsBody === "json" &&
@@ -228,30 +288,6 @@ class ServerHandler {
 					error: "Not Found",
 				},
 				{ status: 404 },
-			);
-		}
-
-		if (logRequest) {
-			const headers = request.headers;
-			let ip = server.requestIP(request)?.address;
-
-			if (!ip || ip.startsWith("172.") || ip === "127.0.0.1") {
-				ip =
-					headers.get("CF-Connecting-IP")?.trim() ||
-					headers.get("X-Real-IP")?.trim() ||
-					headers.get("X-Forwarded-For")?.split(",")[0].trim() ||
-					"unknown";
-			}
-
-			logger.custom(
-				`[${request.method}]`,
-				`(${response.status})`,
-				[
-					request.url,
-					`${(performance.now() - extendedRequest.startPerf).toFixed(2)}ms`,
-					ip || "unknown",
-				],
-				"90",
 			);
 		}
 

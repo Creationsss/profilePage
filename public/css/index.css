@@ -884,6 +884,13 @@ ul {
 	flex-wrap: wrap;
 }
 
+.review-header-inner {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 0.5rem;
+}
+
 .review-username {
 	font-weight: 600;
 	color: var(--text-color);
@@ -905,6 +912,23 @@ ul {
 	display: flex;
 	gap: 0.3rem;
 	flex-wrap: wrap;
+}
+
+.emoji {
+	width: 20px;
+	height: 20px;
+	vertical-align: middle;
+	margin: 0 2px;
+	display: inline-block;
+	transition: transform 0.3s ease;
+}
+
+.emoji:hover {
+	transform: scale(1.2);
+}
+
+.review-content img.emoji {
+	vertical-align: middle;
 }
 
 @media (max-width: 600px) {
@@ -964,5 +988,10 @@ ul {
 
 	.review-badges {
 		justify-content: center;
+	}
+
+	.emoji {
+		width: 16px;
+		height: 16px;
 	}
 }

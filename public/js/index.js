@@ -142,7 +142,7 @@ async function populateReviews(userId) {
 		const data = await res.json();
 
 		if (!data.success || !Array.isArray(data.reviews)) {
-			if (page === 1) reviewSection.classList.add("hidden");
+			if (currentReviewOffset === 0) reviewSection.classList.add("hidden");
 			isLoadingReviews = false;
 			return;
 		}
@@ -152,7 +152,14 @@ async function populateReviews(userId) {
 				const sender = review.sender;
 				const username = sender.username;
 				const avatar = sender.profilePhoto;
-				const comment = review.comment;
+				let comment = review.comment;
+
+				comment = comment.replace(
+					/<(a?):\w+:(\d+)>/g,
+					(_, animated, id) =>
+						`<img src="https://cdn.discordapp.com/emojis/${id}.${animated ? "gif" : "webp"}" class="emoji" alt="emoji" />`,
+				);
+
 				const timestamp = review.timestamp
 					? new Date(review.timestamp * 1000).toLocaleString(undefined, {
 							hour12: false,
@@ -172,18 +179,20 @@ async function populateReviews(userId) {
 					.join("");
 
 				return `
-				<li class="review">
-					<img class="review-avatar" src="${avatar}" alt="${username}'s avatar"/>
-					<div class="review-body">
-						<div class="review-header">
-							<span class="review-username">${username}</span>
-							<span class="review-timestamp">${timestamp}</span>
+					<li class="review">
+						<img class="review-avatar" src="${avatar}" alt="${username}'s avatar"/>
+						<div class="review-body">
+							<div class="review-header">
+								<div class="review-header-inner">
+									<span class="review-username">${username}</span>
+									<span class="review-badges">${badges}</span>
+								</div>
+								<span class="review-timestamp">${timestamp}</span>
+							</div>
+							<div class="review-content">${comment}</div>
 						</div>
-						<div class="review-badges">${badges}</div>
-						<div class="review-content">${comment}</div>
-					</div>
-				</li>
-			`;
+					</li>
+				`;
 			})
 			.join("");
 
@@ -193,7 +202,6 @@ async function populateReviews(userId) {
 		reviewSection.classList.remove("hidden");
 
 		hasMoreReviews = data.hasNextPage;
-		currentReviewPage = page;
 		isLoadingReviews = false;
 	} catch (err) {
 		console.error("Failed to fetch reviews", err);

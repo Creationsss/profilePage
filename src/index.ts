@@ -1,7 +1,10 @@
 import { serverHandler } from "@/server";
+import { verifyRequiredVariables } from "@config/environment";
 import { logger } from "@creations.works/logger";
 
 async function main(): Promise<void> {
+	verifyRequiredVariables();
+
 	serverHandler.initialize();
 }
 
