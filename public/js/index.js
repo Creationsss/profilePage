@@ -258,18 +258,15 @@ function buildActivityHTML(activity) {
 	const activityTypeMap = {
 		0: "Playing",
 		1: "Streaming",
-		2: "Listening",
+		2: "Listening to",
 		3: "Watching",
 		4: "Custom Status",
 		5: "Competing",
 	};
 
-	const activityType =
-		activity.name === "Spotify"
-			? "Listening to Spotify"
-			: activity.name === "TIDAL"
-				? "Listening to TIDAL"
-				: activityTypeMap[activity.type] || "Playing";
+	const activityType = activityTypeMap[activity.type]
+		? `${activityTypeMap[activity.type]}${activity.type === 2 ? ` ${activity.name}` : ""}`
+		: "Playing";
 
 	const activityTimestamp =
 		start && progress === null
