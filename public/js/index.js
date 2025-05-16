@@ -535,6 +535,7 @@ async function updatePresence(initialData) {
 
 	const avatarWrapper = document.querySelector(".avatar-wrapper");
 	const avatarImg = avatarWrapper?.querySelector(".avatar");
+	const decorationImg = avatarWrapper?.querySelector(".decoration");
 	const usernameEl = document.querySelector(".username");
 
 	if (!data.discord_user) {
@@ -564,6 +565,19 @@ async function updatePresence(initialData) {
 		if (siteIcon) {
 			siteIcon.href = newAvatarUrl;
 		}
+	}
+
+	if (
+		decorationImg &&
+		data.discord_user?.avatar_decoration_data &&
+		data.discord_user.avatar_decoration_data.asset
+	) {
+		const newDecorationUrl = `https://cdn.discordapp.com/avatar-decoration-presets/${data.discord_user.avatar_decoration_data.asset}`;
+		decorationImg.src = newDecorationUrl;
+		decorationImg.classList.remove("hidden");
+	} else if (decorationImg) {
+		decorationImg.src = "";
+		decorationImg.classList.add("hidden");
 	}
 
 	if (usernameEl) {

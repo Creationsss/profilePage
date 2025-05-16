@@ -177,10 +177,10 @@ main {
 
 .decoration {
 	position: absolute;
-	top: -18px;
-	left: -18px;
-	width: 164px;
-	height: 164px;
+	top: -13px;
+	left: -16px;
+	width: 160px;
+	height: 160px;
 	pointer-events: none;
 }
 
