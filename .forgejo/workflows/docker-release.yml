@@ -6,33 +6,21 @@ on:
       - "v*"
 
 jobs:
-  docker-release:
+  release:
     runs-on: docker
-    container:
-      image: docker:24.0.5-dind
-      options: --privileged
-
     steps:
-      - name: Install tools
-        run: |
-          apk add --no-cache docker-cli git bash
-
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set tag name
+      - name: Set tag
         run: echo "TAG=${GITHUB_REF##*/}" >> $GITHUB_ENV
 
       - name: Login to Docker Registry
         run: echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
 
-      - name: Build Docker Image
+      - name: Build and Push Docker Image
         run: |
           IMAGE=creations/profile-page
-          docker build --target release -t $IMAGE:${TAG} -t $IMAGE:latest .
-
-      - name: Push Docker Image
-        run: |
-          IMAGE=creations/profile-page
-          docker push $IMAGE:${TAG}
+          docker build --target release -t $IMAGE:$TAG -t $IMAGE:latest .
+          docker push $IMAGE:$TAG
           docker push $IMAGE:latest
