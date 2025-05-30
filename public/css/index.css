@@ -995,3 +995,37 @@ ul {
 		height: 16px;
 	}
 }
+
+/* timezone display */
+
+.timezone-wrapper {
+	position: fixed;
+	top: 1rem;
+	right: 1rem;
+	background-color: var(--card-bg);
+	color: var(--text-color);
+	font-size: 0.9rem;
+	padding: 0.4rem 0.8rem;
+	border-radius: 6px;
+	border: 1px solid var(--border-color);
+	box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+	z-index: 100;
+	user-select: none;
+	opacity: 0.85;
+	transition: opacity 0.2s ease;
+}
+
+.timezone-wrapper:hover {
+	opacity: 1;
+}
+
+.timezone-label {
+	color: var(--text-muted);
+	margin-right: 0.4rem;
+}
+
+@media (max-width: 600px) {
+	.timezone-label {
+		display: none;
+	}
+}

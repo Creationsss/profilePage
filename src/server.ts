@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
-import { environment, robotstxtPath } from "@config/environment";
-import { logger } from "@creations.works/logger";
+import { echo } from "@atums/echo";
+import { environment } from "@config/environment";
 import {
 	type BunFile,
 	FileSystemRouter,
@@ -43,16 +43,14 @@ class ServerHandler {
 			`http://127.0.0.1:${server.port}`,
 		];
 
-		logger.info(`Server running at ${accessUrls[0]}`);
-		logger.info(`Access via: ${accessUrls[1]} or ${accessUrls[2]}`, {
-			breakLine: true,
-		});
+		echo.info(`Server running at ${accessUrls[0]}`);
+		echo.info(`Access via: ${accessUrls[1]} or ${accessUrls[2]}`);
 
 		this.logRoutes();
 	}
 
 	private logRoutes(): void {
-		logger.info("Available routes:");
+		echo.info("Available routes:");
 
 		const sortedRoutes: [string, string][] = Object.entries(
 			this.router.routes,
@@ -61,7 +59,7 @@ class ServerHandler {
 		);
 
 		for (const [path, filePath] of sortedRoutes) {
-			logger.info(`Route: ${path}, File: ${filePath}`);
+			echo.info(`Route: ${path}, File: ${filePath}`);
 		}
 	}
 
@@ -90,11 +88,14 @@ class ServerHandler {
 					headers: { "Content-Type": contentType },
 				});
 			} else {
-				logger.warn(`File not found: ${filePath}`);
+				echo.warn(`File not found: ${filePath}`);
 				response = new Response("Not Found", { status: 404 });
 			}
 		} catch (error) {
-			logger.error([`Error serving static file: ${pathname}`, error as Error]);
+			echo.error({
+				message: `Error serving static file: ${pathname}`,
+				error: error as Error,
+			});
 			response = new Response("Internal Server Error", { status: 500 });
 		}
 
@@ -107,16 +108,23 @@ class ServerHandler {
 		response: Response,
 		ip: string | undefined,
 	): void {
-		logger.custom(
-			`[${request.method}]`,
-			`(${response.status})`,
-			[
-				request.url,
-				`${(performance.now() - request.startPerf).toFixed(2)}ms`,
-				ip || "unknown",
-			],
-			"90",
-		);
+		const pathname = new URL(request.url).pathname;
+
+		const ignoredStartsWith: string[] = ["/public"];
+		const ignoredPaths: string[] = ["/favicon.ico"];
+
+		if (
+			ignoredStartsWith.some((prefix) => pathname.startsWith(prefix)) ||
+			ignoredPaths.includes(pathname)
+		) {
+			return;
+		}
+
+		echo.custom(`${request.method}`, `${response.status}`, [
+			request.url,
+			`${(performance.now() - request.startPerf).toFixed(2)}ms`,
+			ip || "unknown",
+		]);
 	}
 
 	private async handleRequest(
@@ -139,29 +147,21 @@ class ServerHandler {
 		}
 
 		const pathname: string = new URL(request.url).pathname;
-		if (pathname === "/robots.txt" && robotstxtPath) {
-			try {
-				const file: BunFile = Bun.file(robotstxtPath);
 
-				if (await file.exists()) {
-					const fileContent: ArrayBuffer = await file.arrayBuffer();
-					const contentType: string = file.type || "text/plain";
+		const baseDir = resolve("public/custom");
+		const customPath = resolve(baseDir, pathname.slice(1));
 
-					response = new Response(fileContent, {
-						headers: { "Content-Type": contentType },
-					});
-				} else {
-					logger.warn(`File not found: ${robotstxtPath}`);
-					response = new Response("Not Found", { status: 404 });
-				}
-			} catch (error) {
-				logger.error([
-					`Error serving robots.txt: ${robotstxtPath}`,
-					error as Error,
-				]);
-				response = new Response("Internal Server Error", { status: 500 });
-			}
+		if (!customPath.startsWith(baseDir)) {
+			return new Response("Forbidden", { status: 403 });
+		}
 
+		const customFile = Bun.file(customPath);
+		if (await customFile.exists()) {
+			const content = await customFile.arrayBuffer();
+			const type = customFile.type || "application/octet-stream";
+			response = new Response(content, {
+				headers: { "Content-Type": type },
+			});
 			this.logRequest(extendedRequest, response, ip);
 			return response;
 		}
@@ -269,7 +269,10 @@ class ServerHandler {
 					}
 				}
 			} catch (error: unknown) {
-				logger.error([`Error handling route ${request.url}:`, error as Error]);
+				echo.error({
+					message: `Error handling route ${request.url}`,
+					error: error,
+				});
 
 				response = Response.json(
 					{
@@ -291,9 +294,11 @@ class ServerHandler {
 			);
 		}
 
+		this.logRequest(extendedRequest, response, ip);
 		return response;
 	}
 }
+
 const serverHandler: ServerHandler = new ServerHandler(
 	environment.port,
 	environment.host,

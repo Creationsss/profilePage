@@ -3,6 +3,7 @@ const userId = head?.dataset.userId;
 const activityProgressMap = new Map();
 
 const reviewURL = head?.dataset.reviewDb;
+const timezoneApiUrl = head?.dataset.timezoneApi;
 let instanceUri = head?.dataset.instanceUri;
 let badgeURL = head?.dataset.badgeUrl;
 let socket;
@@ -207,6 +208,60 @@ async function populateReviews(userId) {
 		console.error("Failed to fetch reviews", err);
 		isLoadingReviews = false;
 	}
+}
+
+function populateTimezone(userId) {
+	if (!userId || !timezoneApiUrl) return;
+
+	let currentTimezone = null;
+
+	async function fetchTimezone() {
+		try {
+			const res = await fetch(
+				`${timezoneApiUrl}/get?id=${encodeURIComponent(userId)}`,
+			);
+			if (!res.ok) throw new Error("Failed to fetch timezone");
+
+			const json = await res.json();
+			if (!json || typeof json.timezone !== "string") return;
+
+			currentTimezone = json.timezone;
+			updateTime();
+		} catch (err) {
+			console.error("Failed to populate timezone", err);
+		}
+	}
+
+	function updateTime() {
+		if (!currentTimezone) return;
+
+		const timezoneEl = document.querySelector(".timezone-value");
+		if (!timezoneEl) return;
+
+		const now = new Date();
+
+		const time24 = now.toLocaleTimeString("en-GB", {
+			timeZone: currentTimezone,
+			hour12: false,
+			hour: "2-digit",
+			minute: "2-digit",
+			second: "2-digit",
+		});
+
+		const time12 = now.toLocaleTimeString("en-US", {
+			timeZone: currentTimezone,
+			hour12: true,
+			hour: "2-digit",
+			minute: "2-digit",
+			second: "2-digit",
+		});
+
+		timezoneEl.textContent = time24;
+		timezoneEl.title = `${time12} (${currentTimezone})`;
+	}
+
+	fetchTimezone();
+	setInterval(updateTime, 1000);
 }
 
 function setupReviewScrollObserver(userId) {
@@ -593,6 +648,14 @@ async function updatePresence(initialData) {
 		setupReviewScrollObserver(userId);
 	}
 
+	if (kv.timezone !== "false" && userId && timezoneApiUrl) {
+		populateTimezone(userId);
+		const timezoneEl = document.querySelector(".timezone-value");
+		if (timezoneEl) {
+			timezoneEl.classList.remove("hidden");
+		}
+	}
+
 	const platform = {
 		mobile: data.active_on_discord_mobile,
 		web: data.active_on_discord_web,
@@ -755,7 +818,7 @@ function updateClanBadge(data) {
 	const userInfoInner = document.querySelector(".user-info-inner");
 	if (!userInfoInner) return;
 
-	const clan = data?.discord_user?.clan;
+	const clan = data?.discord_user?.primary_guild;
 	if (!clan || !clan.tag || !clan.identity_guild_id || !clan.badge) return;
 
 	const existing = userInfoInner.querySelector(".clan-badge");

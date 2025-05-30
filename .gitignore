@@ -4,3 +4,4 @@ bun.lock
 logs/
 .vscode/
 robots.txt
+public/custom

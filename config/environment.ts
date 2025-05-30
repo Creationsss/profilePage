@@ -1,5 +1,4 @@
-import { resolve } from "node:path";
-import { logger } from "@creations.works/logger";
+import { echo } from "@atums/echo";
 
 const environment: Environment = {
 	port: Number.parseInt(process.env.PORT || "8080", 10),
@@ -22,15 +21,13 @@ const reviewDb = {
 	url: "https://manti.vendicated.dev/api/reviewdb",
 };
 
+const timezoneAPIUrl: string | null = process.env.TIMEZONE_API_URL || null;
+
 const badgeApi: string | null = process.env.BADGE_API_URL || null;
 const steamGridDbKey: string | undefined = process.env.STEAMGRIDDB_API_KEY;
 
 const plausibleScript: string | null =
 	process.env.PLAUSIBLE_SCRIPT_HTML?.trim() || null;
-
-const robotstxtPath: string | null = process.env.ROBOTS_FILE
-	? resolve(process.env.ROBOTS_FILE)
-	: null;
 
 function verifyRequiredVariables(): void {
 	const requiredVariables = [
@@ -46,7 +43,7 @@ function verifyRequiredVariables(): void {
 	for (const key of requiredVariables) {
 		const value = process.env[key];
 		if (value === undefined || value.trim() === "") {
-			logger.error(`Missing or empty environment variable: ${key}`);
+			echo.error(`Missing or empty environment variable: ${key}`);
 			hasError = true;
 		}
 	}
@@ -61,9 +58,9 @@ export {
 	lanyardConfig,
 	redisTtl,
 	reviewDb,
+	timezoneAPIUrl,
 	badgeApi,
 	steamGridDbKey,
 	plausibleScript,
-	robotstxtPath,
 	verifyRequiredVariables,
 };

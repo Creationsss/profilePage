@@ -4,6 +4,7 @@ import {
 	lanyardConfig,
 	plausibleScript,
 	reviewDb,
+	timezoneAPIUrl,
 } from "@config/environment";
 import { file } from "bun";
 
@@ -31,6 +32,10 @@ async function handler(request: ExtendedRequest): Promise<Response> {
 
 				if (reviewDb.enabled) {
 					head.setAttribute("data-review-db", reviewDb.url);
+				}
+
+				if (timezoneAPIUrl) {
+					head.setAttribute("data-timezone-api", timezoneAPIUrl);
 				}
 
 				if (plausibleScript) {

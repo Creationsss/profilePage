@@ -63,8 +63,8 @@ cp .env.example .env
 | `LANYARD_INSTANCE`    | Endpoint of the Lanyard instance                                            |
 | `BADGE_API_URL`       | Badge API URL ([badgeAPI](https://git.creations.works/creations/badgeAPI))  |
 | `REVIEW_DB`           | Enables showing reviews from reviewdb on user pages                         |
+| `TIMEZONE_API_URL`    | Enables showing times from [timezoneDB](https://git.creations.works/creations/timezoneDB) |
 | `STEAMGRIDDB_API_KEY` | SteamGridDB API key for fetching game icons                                 |
-| `ROBOTS_FILE`         | If there it uses the file in /robots.txt route, requires a valid path       |
 
 #### Optional Lanyard KV Variables (per-user customization)
 
@@ -80,6 +80,7 @@ These can be defined in Lanyard's KV store to customize the page:
 | `css`     | URL to a css to change styles on the page, no import or require allowed |
 | `optout`  | Allows users to stop sharing there profile on the website (`true` / `false`) |
 | `reviews` | Enables reviews from reviewdb (`true` / `false`)                   |
+| `timezone`| Enables the showing of the current time from the timezone db API (`true` / `false`) |
 
 ---
 

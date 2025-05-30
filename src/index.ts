@@ -1,6 +1,6 @@
 import { serverHandler } from "@/server";
+import { echo } from "@atums/echo";
 import { verifyRequiredVariables } from "@config/environment";
-import { logger } from "@creations.works/logger";
 
 async function main(): Promise<void> {
 	verifyRequiredVariables();
@@ -8,7 +8,7 @@ async function main(): Promise<void> {
 }
 
 main().catch((error: Error) => {
-	logger.error(["Error initializing the server:", error]);
+	echo.error({ message: "Error initializing the server", error });
 	process.exit(1);
 });
 
