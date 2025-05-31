@@ -63,7 +63,7 @@ cp .env.example .env
 | `LANYARD_INSTANCE`    | Endpoint of the Lanyard instance                                            |
 | `BADGE_API_URL`       | Badge API URL ([badgeAPI](https://git.creations.works/creations/badgeAPI))  |
 | `REVIEW_DB`           | Enables showing reviews from reviewdb on user pages                         |
-| `TIMEZONE_API_URL`    | Enables showing times from [timezoneDB](https://git.creations.works/creations/timezoneDB) |
+| `TIMEZONE_API_URL`    | Enables showing times from [timezoneDB](https://git.creations.works/creations/timezoneDB-rs) |
 | `STEAMGRIDDB_API_KEY` | SteamGridDB API key for fetching game icons                                 |
 
 #### Optional Lanyard KV Variables (per-user customization)
