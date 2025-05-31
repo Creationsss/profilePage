@@ -132,7 +132,7 @@ function resolveActivityImage(img, applicationId) {
 
 async function populateReviews(userId) {
 	if (!reviewURL || !userId || isLoadingReviews || !hasMoreReviews) return;
-	const reviewSection = document.querySelector(".reviews");
+	const reviewSection = document.getElementById("reviews-section");
 	const reviewList = reviewSection?.querySelector(".reviews-list");
 	if (!reviewList) return;
 
@@ -201,7 +201,9 @@ async function populateReviews(userId) {
 		if (currentReviewOffset === 0) reviewList.innerHTML = reviewsHTML;
 		else reviewList.insertAdjacentHTML("beforeend", reviewsHTML);
 
-		reviewSection.classList.remove("hidden");
+		if (data.reviews.length > 0 && reviewsHTML) {
+			reviewSection.classList.remove("hidden");
+		}
 
 		hasMoreReviews = data.hasNextPage;
 		isLoadingReviews = false;
@@ -238,7 +240,8 @@ function populateTimezone(userId, format = "24h") {
 		timezoneLoaded = true;
 
 		const timezoneEl = document.querySelector(".timezone-value");
-		if (!timezoneEl) return;
+		const timezoneWrapper = document.getElementById("timezone-wrapper");
+		if (!timezoneEl || !timezoneWrapper) return;
 
 		const now = new Date();
 
@@ -261,7 +264,7 @@ function populateTimezone(userId, format = "24h") {
 		timezoneEl.textContent = format === "24h" ? time24 : time12;
 		timezoneEl.title = `${format === "12h" ? time24 : time12} (${currentTimezone})`;
 
-		timezoneEl.classList.remove("hidden");
+		timezoneWrapper.classList.remove("hidden");
 	}
 
 	fetchTimezone();
