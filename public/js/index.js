@@ -230,14 +230,14 @@ function populateTimezone(userId, format = "24h") {
 
 			currentTimezone = json.timezone;
 			updateTime();
+			timezoneLoaded = true;
 		} catch (err) {
 			console.error("Failed to populate timezone", err);
 		}
 	}
 
 	function updateTime() {
-		if (!currentTimezone || timezoneLoaded) return;
-		timezoneLoaded = true;
+		if (!currentTimezone) return;
 
 		const timezoneEl = document.querySelector(".timezone-value");
 		const timezoneWrapper = document.getElementById("timezone-wrapper");
