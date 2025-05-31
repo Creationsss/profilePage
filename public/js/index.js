@@ -11,6 +11,7 @@ let socket;
 let badgesLoaded = false;
 let readmeLoaded = false;
 let cssLoaded = false;
+let timezoneLoaded = false;
 
 const reviewsPerPage = 50;
 let currentReviewOffset = 0;
@@ -210,8 +211,8 @@ async function populateReviews(userId) {
 	}
 }
 
-function populateTimezone(userId) {
-	if (!userId || !timezoneApiUrl) return;
+function populateTimezone(userId, format = "24h") {
+	if (!userId || !timezoneApiUrl || timezoneLoaded) return;
 
 	let currentTimezone = null;
 
@@ -233,7 +234,8 @@ function populateTimezone(userId) {
 	}
 
 	function updateTime() {
-		if (!currentTimezone) return;
+		if (!currentTimezone || timezoneLoaded) return;
+		timezoneLoaded = true;
 
 		const timezoneEl = document.querySelector(".timezone-value");
 		if (!timezoneEl) return;
@@ -256,8 +258,10 @@ function populateTimezone(userId) {
 			second: "2-digit",
 		});
 
-		timezoneEl.textContent = time24;
-		timezoneEl.title = `${time12} (${currentTimezone})`;
+		timezoneEl.textContent = format === "24h" ? time24 : time12;
+		timezoneEl.title = `${format === "12h" ? time24 : time12} (${currentTimezone})`;
+
+		timezoneEl.classList.remove("hidden");
 	}
 
 	fetchTimezone();
@@ -468,6 +472,7 @@ async function loadBadges(userId, options = {}) {
 				img.src = badge.badge;
 				img.alt = badge.tooltip;
 				img.title = badge.tooltip;
+				img.tooltip = badge.tooltip;
 				img.className = "badge";
 				target.appendChild(img);
 			}
@@ -649,11 +654,7 @@ async function updatePresence(initialData) {
 	}
 
 	if (kv.timezone !== "false" && userId && timezoneApiUrl) {
-		populateTimezone(userId);
-		const timezoneEl = document.querySelector(".timezone-value");
-		if (timezoneEl) {
-			timezoneEl.classList.remove("hidden");
-		}
+		populateTimezone(userId, kv.timezone_12 === "true" ? "12h" : "24h");
 	}
 
 	const platform = {

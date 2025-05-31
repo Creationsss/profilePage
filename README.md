@@ -81,6 +81,7 @@ These can be defined in Lanyard's KV store to customize the page:
 | `optout`  | Allows users to stop sharing there profile on the website (`true` / `false`) |
 | `reviews` | Enables reviews from reviewdb (`true` / `false`)                   |
 | `timezone`| Enables the showing of the current time from the timezone db API (`true` / `false`) |
+| `timezone_12` | Sets the timezone to default show 12h format, default is 24h   |
 
 ---
 
